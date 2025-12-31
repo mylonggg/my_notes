@@ -217,10 +217,10 @@
         </div>
     </div>
 
-    <!-- 编辑弹窗 - 只调高度 -->
+    <!-- 编辑弹窗 - 调高编辑模式窗口 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[85vh] overflow-hidden flex flex-col">
+        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[90vh] overflow-hidden flex flex-col">
             <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
                 <span class="text-blue-400">✏️</span> 编辑笔记
                 <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
@@ -231,26 +231,24 @@
                 <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">预览模式</button>
             </div>
             
-            <div class="space-y-4 flex-1 overflow-hidden flex flex-col">
-                <div id="editTab" class="flex-1 flex flex-col">
-                    <div class="flex-1 flex flex-col min-h-0">
-                        <div class="flex gap-2 flex-wrap mb-3">
-                            <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H1</button>
-                            <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H2</button>
-                            <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">粗体</button>
-                            <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">斜体</button>
-                            <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">列表</button>
-                            <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">代码块</button>
-                        </div>
-                        
-                        <div class="flex-1 min-h-0">
-                            <textarea id="editNoteContent" 
-                                class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono"
-                                placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
-                        </div>
+            <div class="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
+                <div id="editTab" class="flex-1 flex flex-col min-h-0">
+                    <div class="flex gap-2 flex-wrap mb-3">
+                        <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H1</button>
+                        <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H2</button>
+                        <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">粗体</button>
+                        <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">斜体</button>
+                        <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">列表</button>
+                        <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">代码块</button>
                     </div>
                     
-                    <div class="flex items-center gap-4 text-xs text-slate-500 mt-4">
+                    <div class="flex-1 min-h-0">
+                        <textarea id="editNoteContent" 
+                            class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono"
+                            placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-xs text-slate-500 mt-3">
                         <div class="flex-1">
                             <button onclick="showMarkdownHelp()" class="text-blue-400 hover:text-blue-300 transition text-sm">📖 Markdown 语法帮助</button>
                         </div>
@@ -262,7 +260,7 @@
                     <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
                         Markdown 预览
                     </div>
-                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[50vh]">
+                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto">
                         <!-- Markdown 预览内容 -->
                     </div>
                 </div>
