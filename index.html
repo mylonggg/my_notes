@@ -297,6 +297,8 @@
 
         // 当前编辑的笔记ID
         let currentEditId = null;
+        // 全局缓存笔记数据
+        let notesCache = {};
 
         const app = document.getElementById('app');
 
@@ -638,11 +640,21 @@ console.log('Hello');
                     return;
                 }
                 
+                // 清空缓存
+                notesCache = {};
+                
                 for (let n of notes) {
                     const clearText = await decrypt(n.content, pw);
                     if (!clearText) {
                         continue; // 跳过密码不匹配的笔记
                     }
+                    
+                    // 缓存笔记内容
+                    notesCache[n.id] = {
+                        id: n.id,
+                        clearText: clearText,
+                        created_at: n.created_at
+                    };
                     
                     // 判断是否为 Markdown 内容（简单检测）
                     const isMarkdown = clearText.includes('# ') || clearText.includes('## ') || clearText.includes('```') || 
@@ -653,11 +665,11 @@ console.log('Hello');
                     
                     // 创建预览内容（如果内容太长则截断）
                     let previewContent = clearText;
-                    let fullContent = clearText;
-                    let showFull = false;
+                    let showFullButton = false;
                     
                     if (clearText.length > 300) {
                         previewContent = clearText.substring(0, 300) + '...';
+                        showFullButton = true;
                     }
                     
                     // 渲染预览内容（Markdown 或纯文本）
@@ -671,7 +683,7 @@ console.log('Hello');
                     </div>
                     <div class="markdown-preview text-slate-300 text-sm leading-relaxed" id="noteContent-${n.id}">
                         ${renderedContent}
-                        ${clearText.length > 300 ? '<button onclick="toggleNoteContent(' + n.id + ')" class="text-blue-400 text-xs mt-2 hover:underline">显示全部</button>' : ''}
+                        ${showFullButton ? `<button onclick="toggleNoteContent(${n.id})" class="text-blue-400 text-xs mt-2 hover:underline transition">显示全部</button>` : ''}
                     </div>
                     <div class="pt-4 border-t border-white/5 flex flex-wrap gap-4 items-center">
                         <button onclick="doShareCopy('${n.content.replace(/'/g, "\\'")}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成分享链接</button>
@@ -686,38 +698,53 @@ console.log('Hello');
                 // 高亮代码块
                 hljs.highlightAll();
             } catch (e) { 
+                console.error('加载列表失败:', e);
                 listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">拉取失败，请检查网络连接</div>';
             }
         }
 
+        // 修复的 toggleNoteContent 函数
         function toggleNoteContent(id) {
             const contentDiv = document.getElementById(`noteContent-${id}`);
-            const note = notesCache && notesCache.find(n => n.id === id);
-            if (!note) return;
+            const note = notesCache[id];
             
-            if (contentDiv.innerHTML.includes('显示全部')) {
-                const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
-                                  note.clearText.includes('```') || note.clearText.includes('**');
+            if (!note) {
+                console.error('未找到笔记缓存:', id);
+                return;
+            }
+            
+            const currentContent = contentDiv.innerHTML;
+            const showFullText = currentContent.includes('显示全部');
+            
+            // 判断是否为 Markdown 内容
+            const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
+                               note.clearText.includes('```') || note.clearText.includes('**') ||
+                               note.clearText.includes('- ') || note.clearText.includes('> ');
+            
+            if (showFullText) {
+                // 显示全部内容
                 const renderedContent = isMarkdown ? marked.parse(note.clearText) : 
                                         `<div class="whitespace-pre-wrap">${note.clearText.replace(/\n/g, '<br>')}</div>`;
-                contentDiv.innerHTML = renderedContent + '<button onclick="toggleNoteContent(' + id + ')" class="text-blue-400 text-xs mt-2 hover:underline">收起</button>';
-                hljs.highlightAll();
+                contentDiv.innerHTML = renderedContent + 
+                    `<button onclick="toggleNoteContent(${id})" class="text-blue-400 text-xs mt-2 hover:underline transition">收起</button>`;
+                
+                // 重新高亮代码块
+                setTimeout(() => {
+                    hljs.highlightAll();
+                }, 100);
             } else {
-                const previewContent = note.clearText.substring(0, 300) + '...';
-                const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
-                                  note.clearText.includes('```') || note.clearText.includes('**');
+                // 显示预览内容
+                let previewContent = note.clearText;
+                if (note.clearText.length > 300) {
+                    previewContent = note.clearText.substring(0, 300) + '...';
+                }
+                
                 const renderedContent = isMarkdown ? marked.parse(previewContent) : 
                                         `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
-                contentDiv.innerHTML = renderedContent + '<button onclick="toggleNoteContent(' + id + ')" class="text-blue-400 text-xs mt-2 hover:underline">显示全部</button>';
+                contentDiv.innerHTML = renderedContent + 
+                    `<button onclick="toggleNoteContent(${id})" class="text-blue-400 text-xs mt-2 hover:underline transition">显示全部</button>`;
             }
         }
-
-        // 新增：缓存笔记数据
-        let notesCache = [];
-
-        // 修改 loadList 函数中的循环部分
-        // 在解密后缓存笔记数据
-        // ...（在 loadList 函数中修改这部分）...
 
         // ==================== 新增编辑功能 ====================
         function openEdit(id, content) {
