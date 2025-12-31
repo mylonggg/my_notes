@@ -6,7 +6,7 @@
 
 3.[SQL代码](https://github.com/mylonggg/my_notes/blob/main/src/D1%E5%88%9D%E5%A7%8B%E5%8C%96.md)
 
-4.编辑代码 [输入代码](https://github.com/mylonggg/my_notes/blob/main/src/worker.js)
+4.编辑代码 [输入代码](https://github.com/mylonggg/my_notes/blob/main/src/worker.md)
 
 5.保存部署
 
