@@ -182,25 +182,6 @@
         .hljs {
             background: transparent !important;
         }
-
-        /* 自定义滚动条 */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(30, 41, 59, 0.3);
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(59, 130, 246, 0.5);
-            border-radius: 10px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(59, 130, 246, 0.7);
-        }
     </style>
 </head>
 
@@ -236,62 +217,52 @@
         </div>
     </div>
 
-    <!-- 编辑弹窗 - 放大版 -->
+    <!-- 编辑弹窗 - 只调高度 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-                    <span class="text-blue-400">✏️</span> 编辑笔记
-                    <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
-                </h2>
-                <button onclick="closeEdit()" class="p-3 text-slate-400 hover:text-slate-300 hover:bg-slate-800/50 rounded-2xl transition">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
+        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[85vh] overflow-hidden flex flex-col">
+            <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                <span class="text-blue-400">✏️</span> 编辑笔记
+                <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
+            </h2>
             
             <div class="flex gap-2 mb-4">
-                <button onclick="switchTab('edit')" class="tab-button active" id="editTabBtn">✏️ 编辑模式</button>
-                <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">👁️ 预览模式</button>
-                <div class="ml-auto flex items-center gap-4">
-                    <div class="text-xs text-slate-500">
+                <button onclick="switchTab('edit')" class="tab-button active" id="editTabBtn">编辑模式</button>
+                <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">预览模式</button>
+            </div>
+            
+            <div class="space-y-4 flex-1 overflow-hidden flex flex-col">
+                <div id="editTab" class="flex-1 flex flex-col">
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <div class="flex gap-2 flex-wrap mb-3">
+                            <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H1</button>
+                            <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H2</button>
+                            <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">粗体</button>
+                            <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">斜体</button>
+                            <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">列表</button>
+                            <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">代码块</button>
+                        </div>
+                        
+                        <div class="flex-1 min-h-0">
+                            <textarea id="editNoteContent" 
+                                class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono"
+                                placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-xs text-slate-500 mt-4">
+                        <div class="flex-1">
+                            <button onclick="showMarkdownHelp()" class="text-blue-400 hover:text-blue-300 transition text-sm">📖 Markdown 语法帮助</button>
+                        </div>
                         <span id="editCharCount">0</span> 字符
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[60vh]">
-                <div id="editTab" class="flex flex-col h-full">
-                    <div class="flex-1 flex flex-col">
-                        <div class="mb-4">
-                            <div class="flex gap-2 flex-wrap">
-                                <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">H1</button>
-                                <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">H2</button>
-                                <button onclick="insertMarkdown('### ', '三级标题')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">H3</button>
-                                <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">粗体</button>
-                                <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">斜体</button>
-                                <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">列表</button>
-                                <button onclick="insertMarkdown('1. ', '有序列表项')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">有序</button>
-                                <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">代码块</button>
-                                <button onclick="insertMarkdown('> ', '引用文本')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">引用</button>
-                                <button onclick="insertMarkdown('[链接文本](https://)', '链接')" class="px-3 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition text-sm">链接</button>
-                                <button onclick="showMarkdownHelp()" class="px-3 py-2 bg-blue-800/30 rounded-lg hover:bg-blue-800/50 transition text-sm text-blue-300">帮助</button>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-1 relative">
-                            <textarea id="editNoteContent" 
-                                class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono custom-scrollbar"
-                                placeholder="# 在这里编辑您的 Markdown 笔记&#10;&#10;## 二级标题示例&#10;&#10;- 列表项 1&#10;- 列表项 2&#10;&#10;**粗体文本** 和 *斜体文本*&#10;&#10;```javascript&#10;// 代码示例&#10;console.log('Hello World');&#10;```&#10;&#10;> 引用示例&#10;&#10;---&#10;&#10;尽情发挥您的创意！"></textarea>
-                        </div>
-                    </div>
-                </div>
                 
-                <div id="previewTab" class="flex flex-col h-full hidden lg:flex">
-                    <div class="text-sm text-slate-400 font-semibold mb-3">实时预览</div>
-                    <div id="markdownPreview" class="markdown-preview p-6 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto custom-scrollbar">
+                <div id="previewTab" class="flex-1 overflow-y-auto hidden">
+                    <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        Markdown 预览
+                    </div>
+                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[50vh]">
                         <!-- Markdown 预览内容 -->
                     </div>
                 </div>
@@ -300,13 +271,10 @@
             <div class="flex gap-3 pt-6 border-t border-white/5">
                 <button onclick="closeEdit()"
                     class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
-                    取消编辑
+                    取消
                 </button>
                 <button onclick="saveEdit()"
-                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-                    </svg>
+                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
                     保存更改
                 </button>
             </div>
@@ -314,10 +282,7 @@
             <div class="pt-4 border-t border-white/5 text-xs text-slate-500">
                 <p class="flex items-center gap-2">
                     <span class="text-yellow-400">⚠️</span>
-                    注意：编辑后笔记将使用当前主密码重新加密保存到云端，请确保密码正确
-                </p>
-                <p class="mt-2 text-[11px]">
-                    提示：支持所有标准 Markdown 语法，包括表格、任务列表、公式等高级功能
+                    注意：编辑后笔记将使用当前主密码重新加密保存到云端
                 </p>
             </div>
         </div>
@@ -426,7 +391,7 @@
                                 <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition">📖 Markdown 语法帮助</button>
                             </div>
                             <textarea id="noteInput" placeholder="# 输入您的 Markdown 笔记...&#10;&#10;## 支持功能&#10;- 标题、列表、代码块&#10;- **粗体**、*斜体*、[链接]()&#10;- 表格、引用、分割线" 
-                                class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed font-mono custom-scrollbar"></textarea>
+                                class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed font-mono"></textarea>
                             <div class="flex items-center gap-2 text-xs text-slate-500 mt-2">
                                 <span id="noteCharCount">0</span> 字符
                             </div>
@@ -549,12 +514,7 @@ console.log('Hello');
 
 ## 任务列表
 - [ ] 未完成任务
-- [x] 已完成任务
-
-## 高级功能
-- 数学公式: \`\\(公式\\)\` 或 \`\\[公式\\]\`
-- 脚注: \`[^1]\`
-- 定义列表: \`术语\` : 定义`;
+- [x] 已完成任务`;
 
             alert(helpContent);
         }
@@ -568,9 +528,7 @@ console.log('Hello');
             
             if (tabName === 'edit') {
                 editTab.classList.remove('hidden');
-                if (window.innerWidth >= 1024) {
-                    previewTab.classList.remove('hidden');
-                }
+                previewTab.classList.add('hidden');
                 editTabBtn.classList.add('active');
                 previewTabBtn.classList.remove('active');
             } else {
@@ -580,15 +538,10 @@ console.log('Hello');
                 previewTabBtn.classList.add('active');
                 
                 // 更新预览
-                updatePreview();
+                const previewDiv = document.getElementById('markdownPreview');
+                previewDiv.innerHTML = marked.parse(editContent.value || '');
+                hljs.highlightAll();
             }
-        }
-
-        function updatePreview() {
-            const editContent = document.getElementById('editNoteContent');
-            const previewDiv = document.getElementById('markdownPreview');
-            previewDiv.innerHTML = marked.parse(editContent.value || '');
-            hljs.highlightAll();
         }
 
         function insertMarkdown(syntax, placeholder) {
@@ -613,7 +566,6 @@ console.log('Hello');
             
             textarea.focus();
             updateCharCount();
-            updatePreview();
         }
 
         function updateCharCount() {
@@ -806,18 +758,9 @@ console.log('Hello');
             // 更新字符计数
             updateCharCount();
             
-            // 监听输入更新字符计数和预览
+            // 监听输入更新字符计数
             const textarea = document.getElementById('editNoteContent');
-            textarea.addEventListener('input', function() {
-                updateCharCount();
-                if (document.getElementById('previewTabBtn').classList.contains('active') || 
-                    window.innerWidth >= 1024) {
-                    updatePreview();
-                }
-            });
-            
-            // 初始更新预览
-            updatePreview();
+            textarea.addEventListener('input', updateCharCount);
             
             // 切换到编辑标签
             switchTab('edit');
