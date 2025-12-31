@@ -182,6 +182,1106 @@
         .hljs {
             background: transparent !important;
         }
+
+        /* 安全锁定样式 */
+        .locked {
+            filter: blur(2px);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen selection:bg-blue-500/30">
+    <div id="app" class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+        <!-- 动态加载区 -->
+    </div>
+
+    <!-- 极简设置弹窗 -->
+    <div id="settingsModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl space-y-6">
+            <h2 class="text-2xl font-extrabold tracking-tight">⚙️ 系统配置</h2>
+            <div class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1">Worker
+                        服务地址</label>
+                    <input id="setApi" type="text" placeholder="https://..."
+                        class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1">管理员密钥</label>
+                    <input id="setKey" type="password" placeholder="••••••••"
+                        class="w-full bg-slate-900/50 border border-slate-700 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all">
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeSettings()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">取消</button>
+                <button onclick="saveSettings()"
+                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 密码验证弹窗 -->
+    <div id="passwordModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl space-y-6">
+            <div class="text-center">
+                <div class="inline-flex p-4 bg-red-500/10 rounded-full text-4xl mb-4">🔒</div>
+                <h2 class="text-2xl font-extrabold tracking-tight">安全验证</h2>
+                <p class="text-slate-400 text-sm mt-2">请输入编辑密码以继续操作</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1">
+                        编辑密码 <span id="attemptCount" class="text-orange-400">(剩余尝试次数: 3)</span>
+                    </label>
+                    <input id="editPassword" type="password" placeholder="••••••••"
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all font-mono">
+                    <div id="passwordError" class="text-red-400 text-xs hidden mt-1">❌ 密码错误，请重试</div>
+                </div>
+                
+                <div class="text-xs text-slate-500">
+                    <p>⚠️ 注意：连续3次密码错误将锁定编辑功能</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closePasswordModal()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
+                    取消
+                </button>
+                <button onclick="verifyEditPassword()"
+                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
+                    验证
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 锁定状态弹窗 -->
+    <div id="lockedModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md z-[70] flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl space-y-6 text-center">
+            <div class="text-6xl mb-4">⛔</div>
+            <h2 class="text-2xl font-extrabold tracking-tight text-red-400">编辑功能已锁定</h2>
+            <p class="text-slate-300">由于连续3次密码验证失败，编辑功能已被暂时禁用</p>
+            <div class="bg-red-500/10 p-4 rounded-2xl border border-red-500/20">
+                <p class="text-sm text-slate-300">请等待 <span id="lockTimer" class="text-white font-bold">30</span> 秒后重试</p>
+                <p class="text-xs text-slate-500 mt-2">或刷新页面重新开始验证</p>
+            </div>
+            <button onclick="location.reload()" class="w-full py-4 gradient-btn text-white font-bold rounded-2xl mt-4">
+                刷新页面
+            </button>
+        </div>
+    </div>
+
+    <!-- 编辑弹窗 -->
+    <div id="editModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col">
+            <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                <span class="text-blue-400">✏️</span> 编辑笔记
+                <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
+            </h2>
+            
+            <div class="flex gap-2 mb-4">
+                <button onclick="switchTab('edit')" class="tab-button active" id="editTabBtn">编辑模式</button>
+                <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">预览模式</button>
+            </div>
+            
+            <div class="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
+                <div id="editTab" class="flex-1 flex flex-col min-h-0">
+                    <div class="flex gap-2 flex-wrap mb-3">
+                        <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H1</button>
+                        <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">H2</button>
+                        <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">粗体</button>
+                        <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">斜体</button>
+                        <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">列表</button>
+                        <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">代码块</button>
+                    </div>
+                    
+                    <div class="flex-1 min-h-0">
+                        <textarea id="editNoteContent" 
+                            class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono min-h-[45vh]"
+                            placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-xs text-slate-500 mt-3">
+                        <div class="flex-1">
+                            <button onclick="showMarkdownHelp()" class="text-blue-400 hover:text-blue-300 transition text-sm">📖 Markdown 语法帮助</button>
+                        </div>
+                        <span id="editCharCount">0</span> 字符
+                    </div>
+                </div>
+                
+                <div id="previewTab" class="flex-1 overflow-y-auto hidden min-h-0">
+                    <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        Markdown 预览
+                    </div>
+                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[60vh]">
+                        <!-- Markdown 预览内容 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 pt-6 border-t border-white/5">
+                <button onclick="closeEdit()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
+                    取消
+                </button>
+                <button onclick="saveEdit()"
+                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
+                    保存更改
+                </button>
+            </div>
+            
+            <div class="pt-4 border-t border-white/5 text-xs text-slate-500">
+                <p class="flex items-center gap-2">
+                    <span class="text-yellow-400">⚠️</span>
+                    注意：编辑后笔记将使用当前主密码重新加密保存到云端
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let apiFromUrl = urlParams.get('api');
+        const cfgFromUrl = urlParams.get('cfg');
+        if (cfgFromUrl) { try { apiFromUrl = atob(cfgFromUrl); } catch (e) { } }
+        const shareId = urlParams.get('share');
+
+        let API_URL = apiFromUrl || localStorage.getItem('cf_notes_api') || "";
+        let ADMIN_KEY = localStorage.getItem('cf_notes_key') || "";
+
+        // 当前编辑的笔记ID和内容
+        let currentEditId = null;
+        let pendingEditContent = null;
+        
+        // 全局缓存笔记数据
+        let notesCache = {};
+        
+        // 编辑密码验证相关变量
+        let editPasswordAttempts = 0;
+        const MAX_ATTEMPTS = 3;
+        let isEditLocked = false;
+        let lockTimeout = null;
+        const LOCK_DURATION = 30; // 锁定30秒
+
+        const app = document.getElementById('app');
+
+        // 加解密逻辑
+        async function getK(pw) {
+            const enc = new TextEncoder();
+            const hash = await crypto.subtle.digest('SHA-256', enc.encode(pw));
+            return await crypto.subtle.importKey('raw', hash, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+        }
+        
+        async function encrypt(text, pw) {
+            const enc = new TextEncoder(); 
+            const iv = crypto.getRandomValues(new Uint8Array(12)); 
+            const key = await getK(pw);
+            const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(text));
+            return btoa(JSON.stringify({ iv: Array.from(iv), data: Array.from(new Uint8Array(cipher)) }));
+        }
+        
+        async function decrypt(json, pw) {
+            try {
+                const { iv, data } = JSON.parse(atob(json)); 
+                const key = await getK(pw);
+                const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: new Uint8Array(iv) }, key, new Uint8Array(data));
+                return new TextDecoder().decode(dec);
+            } catch (e) { return null; }
+        }
+
+        // Markdown 配置
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return code;
+            }
+        });
+
+        // 编辑密码验证系统
+        function initEditPasswordSystem() {
+            // 从localStorage加载状态
+            const lockedUntil = localStorage.getItem('edit_locked_until');
+            if (lockedUntil && Date.now() < parseInt(lockedUntil)) {
+                isEditLocked = true;
+                showLockedModal();
+                startLockTimer(parseInt(lockedUntil) - Date.now());
+            } else {
+                // 如果锁定已过期，清除状态
+                if (lockedUntil) {
+                    localStorage.removeItem('edit_locked_until');
+                    localStorage.removeItem('edit_password_attempts');
+                }
+            }
+            
+            editPasswordAttempts = parseInt(localStorage.getItem('edit_password_attempts')) || 0;
+        }
+
+        function showPasswordModal() {
+            if (isEditLocked) {
+                showLockedModal();
+                return false;
+            }
+            
+            document.getElementById('passwordModal').classList.remove('hidden');
+            document.getElementById('editPassword').value = '';
+            document.getElementById('passwordError').classList.add('hidden');
+            document.getElementById('attemptCount').textContent = `(剩余尝试次数: ${MAX_ATTEMPTS - editPasswordAttempts})`;
+            document.getElementById('editPassword').focus();
+            return true;
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            currentEditId = null;
+            pendingEditContent = null;
+        }
+
+        function verifyEditPassword() {
+            const password = document.getElementById('editPassword').value;
+            const errorElement = document.getElementById('passwordError');
+            
+            // 这里可以设置一个固定的编辑密码，或者使用主密码
+            // 为了安全，建议使用主密码作为编辑密码
+            const mainPw = document.getElementById('mainPw') ? document.getElementById('mainPw').value : '';
+            
+            if (password === mainPw) {
+                // 密码正确，重置尝试次数
+                editPasswordAttempts = 0;
+                localStorage.setItem('edit_password_attempts', '0');
+                document.getElementById('passwordModal').classList.add('hidden');
+                
+                // 打开真正的编辑窗口
+                if (currentEditId && pendingEditContent) {
+                    openEditAfterVerification(currentEditId, pendingEditContent);
+                }
+            } else {
+                // 密码错误
+                editPasswordAttempts++;
+                localStorage.setItem('edit_password_attempts', editPasswordAttempts.toString());
+                
+                // 更新剩余尝试次数显示
+                const remaining = MAX_ATTEMPTS - editPasswordAttempts;
+                document.getElementById('attemptCount').textContent = `(剩余尝试次数: ${remaining})`;
+                
+                // 显示错误信息并抖动效果
+                errorElement.classList.remove('hidden');
+                const passwordInput = document.getElementById('editPassword');
+                passwordInput.classList.add('shake');
+                passwordInput.value = '';
+                passwordInput.focus();
+                
+                // 移除抖动动画
+                setTimeout(() => {
+                    passwordInput.classList.remove('shake');
+                }, 500);
+                
+                // 检查是否达到最大尝试次数
+                if (editPasswordAttempts >= MAX_ATTEMPTS) {
+                    lockEditFunction();
+                }
+            }
+        }
+
+        function lockEditFunction() {
+            isEditLocked = true;
+            const lockUntil = Date.now() + (LOCK_DURATION * 1000);
+            localStorage.setItem('edit_locked_until', lockUntil.toString());
+            localStorage.setItem('edit_password_attempts', MAX_ATTEMPTS.toString());
+            
+            closePasswordModal();
+            showLockedModal();
+        }
+
+        function showLockedModal() {
+            document.getElementById('lockedModal').classList.remove('hidden');
+            startLockTimer(LOCK_DURATION * 1000);
+        }
+
+        function startLockTimer(durationMs) {
+            clearTimeout(lockTimeout);
+            
+            const timerElement = document.getElementById('lockTimer');
+            let remainingSeconds = Math.ceil(durationMs / 1000);
+            
+            function updateTimer() {
+                timerElement.textContent = remainingSeconds;
+                
+                if (remainingSeconds > 0) {
+                    remainingSeconds--;
+                    lockTimeout = setTimeout(updateTimer, 1000);
+                } else {
+                    // 锁定时间到
+                    isEditLocked = false;
+                    editPasswordAttempts = 0;
+                    localStorage.removeItem('edit_locked_until');
+                    localStorage.setItem('edit_password_attempts', '0');
+                    document.getElementById('lockedModal').classList.add('hidden');
+                }
+            }
+            
+            updateTimer();
+        }
+
+        function init() {
+            initEditPasswordSystem();
+            if (shareId) renderShareView();
+            else if (!API_URL) renderWelcomeView();
+            else renderMainView();
+        }
+
+        function renderWelcomeView() {
+            app.innerHTML = `
+            <div class="glass p-12 rounded-[3rem] text-center space-y-8 animate-in fade-in zoom-in duration-700">
+                <div class="inline-flex p-5 bg-blue-500/10 rounded-full text-5xl">🛡️</div>
+                <div class="space-y-2">
+                    <h1 class="text-4xl font-extrabold tracking-tight italic">CloudNotes</h1>
+                    <p class="text-slate-400 leading-relaxed">您的专属分布式加密笔记系统<br>请先关联您的 Cloudflare Worker 后端</p>
+                </div>
+                <button onclick="configUrl()" class="px-10 py-5 gradient-btn text-white font-black rounded-3xl shadow-2xl">初始化配置</button>
+            </div>
+        `;
+        }
+
+        function renderMainView() {
+            app.innerHTML = `
+            <div class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <header class="flex justify-between items-end">
+                    <div class="space-y-1">
+                        <h1 class="text-4xl font-extrabold tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">CloudNotes</h1>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-blue-500 font-black">端到端加密保险库 | 支持 Markdown</p>
+                    </div>
+                    <button onclick="configUrl()" class="p-4 glass rounded-2xl hover:rotate-180 transition-all duration-500 text-xl">⚙️</button>
+                </header>
+
+                <main class="glass p-8 rounded-[2.5rem] shadow-2xl space-y-6 border-white/5">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                                解密主密码（同时用于编辑验证）
+                            </label>
+                            <input id="mainPw" type="password" placeholder="输入主密码以加密/解密数据和验证编辑权限" 
+                                class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition-all font-mono">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 block">
+                                    笔记内容 (支持 Markdown 格式)
+                                </label>
+                                <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition">📖 Markdown 语法帮助</button>
+                            </div>
+                            <textarea id="noteInput" placeholder="# 输入您的 Markdown 笔记...&#10;&#10;## 支持功能&#10;- 标题、列表、代码块&#10;- **粗体**、*斜体*、[链接]()&#10;- 表格、引用、分割线" 
+                                class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed font-mono"></textarea>
+                            <div class="flex items-center gap-2 text-xs text-slate-500 mt-2">
+                                <span id="noteCharCount">0</span> 字符
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="doSave()" class="gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:shadow-lg transition">加密存入云端</button>
+                        <button onclick="doAI()" class="glass text-purple-400 py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:bg-purple-500/10 transition border-purple-500/20">✨ AI 智能总结</button>
+                    </div>
+                </main>
+
+                <section class="space-y-6">
+                    <div class="flex justify-between items-center px-4">
+                        <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 italic">Vault / 我的加密库</h2>
+                        <div class="flex gap-2">
+                            <button onclick="showMarkdownHelp()" class="text-blue-400 text-xs font-black hover:underline">Markdown 语法</button>
+                            <button onclick="loadList()" class="text-blue-500 text-xs font-black hover:underline uppercase">刷新列表</button>
+                        </div>
+                    </div>
+                    <div id="notesList" class="space-y-6">
+                        <div class="text-center py-20 text-slate-600 italic text-sm">配置完成后输入密码并点击刷新。</div>
+                    </div>
+                </section>
+                
+                <footer class="text-center pt-8 pb-4 opacity-50 hover:opacity-100 transition duration-500">
+                    <span class="text-3xl font-black uppercase tracking-widest text-red-500">
+                        蒼天已死，黃天當立
+                    </span>
+                </footer>
+            </div>
+        `;
+            
+            // 添加字符计数监听
+            const noteInput = document.getElementById('noteInput');
+            const noteCharCount = document.getElementById('noteCharCount');
+            if (noteInput && noteCharCount) {
+                noteInput.addEventListener('input', function() {
+                    noteCharCount.textContent = this.value.length;
+                });
+            }
+        }
+
+        function renderShareView() {
+            app.innerHTML = `
+            <div class="glass p-12 rounded-[3rem] shadow-2xl text-center space-y-8 animate-in zoom-in duration-500">
+                <div class="text-6xl animate-bounce">🔥</div>
+                <div class="space-y-2">
+                    <h1 class="text-3xl font-black italic">阅后即焚解密</h1>
+                    <p class="text-slate-400 text-sm">解密后数据将立即从服务器物理擦除</p>
+                </div>
+                <input id="sharePw" type="password" placeholder="请输入 6 位以上解密密码" class="w-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-orange-500/50 text-center font-mono">
+                <button id="unlockBtn" onclick="doUnlockShare()" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-[1.02] transition">解密并销毁</button>
+                <div id="shareResult" class="mt-8 text-left p-6 bg-slate-950/50 rounded-2xl hidden markdown-preview leading-relaxed border border-orange-500/20 ring-1 ring-orange-500/10 shadow-inner"></div>
+                <div class="pt-8 border-t border-white/5">
+                    <span class="text-3xl font-black uppercase tracking-widest text-red-500">
+                        蒼天已死，黃天當立
+                    </span>
+                </div>
+            </div>
+        `;
+        }
+
+        /* --- 功能逻辑 --- */
+        function configUrl() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('setApi').value = API_URL;
+            document.getElementById('setKey').value = ADMIN_KEY;
+        }
+        
+        function closeSettings() { 
+            document.getElementById('settingsModal').classList.add('hidden'); 
+        }
+        
+        function saveSettings() {
+            localStorage.setItem('cf_notes_api', document.getElementById('setApi').value);
+            localStorage.setItem('cf_notes_key', document.getElementById('setKey').value);
+            location.reload();
+        }
+
+        // Markdown 辅助函数
+        function showMarkdownHelp() {
+            const helpContent = `# Markdown 语法速查
+
+## 标题
+\`# 一级标题\`
+\`## 二级标题\`
+\`### 三级标题\`
+
+## 文本样式
+- **粗体**: \`**粗体文本**\`
+- *斜体*: \`*斜体文本*\`
+- ~~删除线~~: \`~~删除文本~~\`
+- \`行内代码\`: \`\` 代码 \`\`
+
+## 列表
+- 无序列表: \`- 项目\`
+- 有序列表: \`1. 项目\`
+
+## 链接与图片
+- [链接](https://example.com): \`[链接文本](URL)\`
+- ![图片](https://example.com/image.jpg): \`![替代文本](图片URL)\`
+
+## 代码块
+\`\`\`javascript
+// JavaScript 代码
+console.log('Hello');
+\`\`\`
+
+## 引用
+> 引用内容: \`> 引用文本\`
+
+## 表格
+| 表头 | 表头 |
+|------|------|
+| 内容 | 内容 |
+
+## 分割线
+\`---\` 或 \`***\`
+
+## 任务列表
+- [ ] 未完成任务
+- [x] 已完成任务`;
+
+            alert(helpContent);
+        }
+
+        function switchTab(tabName) {
+            const editTab = document.getElementById('editTab');
+            const previewTab = document.getElementById('previewTab');
+            const editTabBtn = document.getElementById('editTabBtn');
+            const previewTabBtn = document.getElementById('previewTabBtn');
+            const editContent = document.getElementById('editNoteContent');
+            
+            if (tabName === 'edit') {
+                editTab.classList.remove('hidden');
+                previewTab.classList.add('hidden');
+                editTabBtn.classList.add('active');
+                previewTabBtn.classList.remove('active');
+            } else {
+                editTab.classList.add('hidden');
+                previewTab.classList.remove('hidden');
+                editTabBtn.classList.remove('active');
+                previewTabBtn.classList.add('active');
+                
+                // 更新预览
+                const previewDiv = document.getElementById('markdownPreview');
+                previewDiv.innerHTML = marked.parse(editContent.value || '');
+                hljs.highlightAll();
+            }
+        }
+
+        function insertMarkdown(syntax, placeholder) {
+            const textarea = document.getElementById('editNoteContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            if (selectedText) {
+                // 如果已选择文本，则围绕它插入语法
+                const newText = syntax + selectedText + (syntax.startsWith('*') || syntax.startsWith('_') ? syntax : '');
+                textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+                textarea.selectionStart = start;
+                textarea.selectionEnd = start + newText.length;
+            } else {
+                // 如果未选择文本，则插入语法和占位符
+                const placeholderText = syntax.includes('\n') ? syntax.replace('\n\n```', '\n' + placeholder + '\n```') : syntax + placeholder;
+                textarea.value = textarea.value.substring(0, start) + placeholderText + textarea.value.substring(end);
+                textarea.selectionStart = start + syntax.length;
+                textarea.selectionEnd = start + placeholderText.length;
+            }
+            
+            textarea.focus();
+            updateCharCount();
+        }
+
+        function updateCharCount() {
+            const textarea = document.getElementById('editNoteContent');
+            const charCount = document.getElementById('editCharCount');
+            if (textarea && charCount) {
+                charCount.textContent = textarea.value.length;
+            }
+        }
+
+        async function doSave(content, id = null) {
+            const text = content || document.getElementById('noteInput').value;
+            const pw = document.getElementById('mainPw').value;
+            
+            if (!text || !pw) {
+                alert("请填写内容和密码");
+                return null;
+            }
+            
+            try {
+                // 加密内容
+                const cipher = await encrypt(text, pw);
+                
+                // 构建请求体
+                const body = { content: cipher };
+                
+                // 如果是编辑模式，添加ID
+                if (id !== null) {
+                    body.id = id;
+                }
+                
+                const res = await fetch(`${API_URL}/api/save`, {
+                    method: 'POST', 
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': ADMIN_KEY 
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                if (res.ok) { 
+                    if (id === null) {
+                        alert("✅ 已存入安全库"); 
+                        document.getElementById('noteInput').value = ""; 
+                        document.getElementById('noteCharCount').textContent = "0";
+                    } else {
+                        alert("✅ 笔记已更新");
+                    }
+                    loadList();
+                    return true;
+                } else {
+                    alert("❌ 保存失败");
+                    return false;
+                }
+            } catch (e) { 
+                alert("❌ 网络连接失败"); 
+                return false;
+            }
+        }
+
+        async function loadList() {
+            const pw = document.getElementById('mainPw').value; 
+            if (!pw) return alert("请输入密码解密");
+            
+            const listDiv = document.getElementById('notesList');
+            listDiv.innerHTML = '<div class="text-center py-12 text-slate-600 italic text-sm">加载中...</div>';
+            
+            try {
+                const res = await fetch(`${API_URL}/api/list`, { headers: { 'Authorization': ADMIN_KEY } });
+                const notes = await res.json(); 
+                listDiv.innerHTML = "";
+                
+                if (notes.length === 0) {
+                    listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">暂无数据</div>';
+                    return;
+                }
+                
+                // 清空缓存
+                notesCache = {};
+                
+                for (let n of notes) {
+                    const clearText = await decrypt(n.content, pw);
+                    if (!clearText) {
+                        continue; // 跳过密码不匹配的笔记
+                    }
+                    
+                    // 缓存笔记内容
+                    notesCache[n.id] = {
+                        id: n.id,
+                        clearText: clearText,
+                        created_at: n.created_at
+                    };
+                    
+                    // 判断是否为 Markdown 内容（简单检测）
+                    const isMarkdown = clearText.includes('# ') || clearText.includes('## ') || clearText.includes('```') || 
+                                       clearText.includes('**') || clearText.includes('- ') || clearText.includes('> ');
+                    
+                    const card = document.createElement('div');
+                    card.className = "note-card glass p-6 rounded-3xl space-y-4 border border-white/5 shadow-lg group";
+                    
+                    // 创建预览内容（如果内容太长则截断）
+                    let previewContent = clearText;
+                    let showFullButton = false;
+                    
+                    if (clearText.length > 300) {
+                        previewContent = clearText.substring(0, 300) + '...';
+                        showFullButton = true;
+                    }
+                    
+                    // 渲染预览内容（Markdown 或纯文本）
+                    const renderedContent = isMarkdown ? marked.parse(previewContent) : 
+                                            `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
+                    
+                    card.innerHTML = `
+                    <div class="flex justify-between text-[9px] font-black text-slate-500 tracking-widest uppercase italic">
+                        <span>索引编号 #${n.id}</span>
+                        <span>${new Date(n.created_at).toLocaleString()}</span>
+                    </div>
+                    <div class="markdown-preview text-slate-300 text-sm leading-relaxed" id="noteContent-${n.id}">
+                        ${renderedContent}
+                        ${showFullButton ? `<button onclick="toggleNoteContent(${n.id})" class="text-blue-400 text-xs mt-2 hover:underline transition">显示全部</button>` : ''}
+                    </div>
+                    <div class="pt-4 border-t border-white/5 flex flex-wrap gap-4 items-center">
+                        <button onclick="doShareCopy('${n.content.replace(/'/g, "\\'")}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成分享链接</button>
+                        <button onclick="doExport(\`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${n.id})" class="text-xs font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition">💾 导出备份</button>
+                        <button onclick="openEdit(${n.id}, \`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" class="text-xs font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition">✏️ 编辑</button>
+                        <button onclick="doDelete(${n.id})" class="text-xs font-black text-rose-500 uppercase tracking-widest ml-auto opacity-40 group-hover:opacity-100 transition">🗑️ 删除</button>
+                    </div>
+                `;
+                    listDiv.appendChild(card);
+                }
+                
+                // 高亮代码块
+                hljs.highlightAll();
+            } catch (e) { 
+                console.error('加载列表失败:', e);
+                listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">拉取失败，请检查网络连接</div>';
+            }
+        }
+
+        // 修复的 toggleNoteContent 函数
+        function toggleNoteContent(id) {
+            const contentDiv = document.getElementById(`noteContent-${id}`);
+            const note = notesCache[id];
+            
+            if (!note) {
+                console.error('未找到笔记缓存:', id);
+                return;
+            }
+            
+            const currentContent = contentDiv.innerHTML;
+            const showFullText = currentContent.includes('显示全部');
+            
+            // 判断是否为 Markdown 内容
+            const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
+                               note.clearText.includes('```') || note.clearText.includes('**') ||
+                               note.clearText.includes('- ') || note.clearText.includes('> ');
+            
+            if (showFullText) {
+                // 显示全部内容
+                const renderedContent = isMarkdown ? marked.parse(note.clearText) : 
+                                        `<div class="whitespace-pre-wrap">${note.clearText.replace(/\n/g, '<br>')}</div>`;
+                contentDiv.innerHTML = renderedContent + 
+                    `<button onclick="toggleNoteContent(${id})" class="text-blue-400 text-xs mt-2 hover:underline transition">收起</button>`;
+                
+                // 重新高亮代码块
+                setTimeout(() => {
+                    hljs.highlightAll();
+                }, 100);
+            } else {
+                // 显示预览内容
+                let previewContent = note.clearText;
+                if (note.clearText.length > 300) {
+                    previewContent = note.clearText.substring(0, 300) + '...';
+                }
+                
+                const renderedContent = isMarkdown ? marked.parse(previewContent) : 
+                                        `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
+                contentDiv.innerHTML = renderedContent + 
+                    `<button onclick="toggleNoteContent(${id})" class="text-blue-400 text-xs mt-2 hover:underline transition">显示全部</button>`;
+            }
+        }
+
+        // ==================== 新增编辑功能 ====================
+        function openEdit(id, content) {
+            // 先检查是否被锁定
+            if (isEditLocked) {
+                showLockedModal();
+                return;
+            }
+            
+            // 存储编辑信息
+            currentEditId = id;
+            pendingEditContent = content;
+            
+            // 显示密码验证弹窗
+            showPasswordModal();
+        }
+        
+        function openEditAfterVerification(id, content) {
+            currentEditId = id;
+            document.getElementById('editNoteId').textContent = `#${id}`;
+            document.getElementById('editNoteContent').value = content;
+            
+            // 更新字符计数
+            updateCharCount();
+            
+            // 监听输入更新字符计数
+            const textarea = document.getElementById('editNoteContent');
+            textarea.addEventListener('input', updateCharCount);
+            
+            // 切换到编辑标签
+            switchTab('edit');
+            
+            document.getElementById('editModal').classList.remove('hidden');
+            
+            // 聚焦到文本区域
+            setTimeout(() => {
+                textarea.focus();
+            }, 100);
+        }
+        
+        function closeEdit() {
+            document.getElementById('editModal').classList.add('hidden');
+            currentEditId = null;
+            pendingEditContent = null;
+        }
+        
+        async function saveEdit() {
+            const newContent = document.getElementById('editNoteContent').value;
+            
+            if (!newContent.trim()) {
+                alert("笔记内容不能为空");
+                return;
+            }
+            
+            // 直接调用 doSave 函数来保存编辑后的内容
+            const success = await doSave(newContent, currentEditId);
+            
+            if (success) {
+                closeEdit();
+            }
+        }
+
+        async function doShareCopy(cipher) {
+            const pid = Math.random().toString(36).substring(2, 12);
+            try {
+                await fetch(`${API_URL}/api/save`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': ADMIN_KEY },
+                    body: JSON.stringify({ content: cipher, public_id: pid, is_share: 1 })
+                });
+                const fullUrl = `${window.location.origin}${window.location.pathname}?share=${pid}&cfg=${btoa(API_URL)}`;
+                prompt("✅ 阅后即焚加密链接已生成：", fullUrl);
+            } catch (e) { alert("分享失败"); }
+        }
+
+        function doExport(text, id) {
+            const date = new Date().toISOString().split('T')[0];
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = `CloudNote_${id}_${date}.md`; 
+            a.click();
+        }
+
+        async function doDelete(id) {
+            if (!confirm("确定要物理抹除这条记录吗？")) return;
+            await fetch(`${API_URL}/api/delete`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': ADMIN_KEY },
+                body: JSON.stringify({ id: id })
+            });
+            loadList();
+        }
+
+        async function doAI() {
+            const text = document.getElementById('noteInput').value; 
+            if (!text) return alert("笔记为空");
+            const btn = event.target; 
+            btn.innerText = "思考中..."; 
+            btn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/api/ai-sum`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': ADMIN_KEY },
+                    body: JSON.stringify({ text: text.substring(0, 1000) })
+                });
+                const data = await res.json();
+                document.getElementById('noteInput').value += `\n\n--- ✨ AI 总结 ---\n\n${data.summary}`;
+                // 更新字符计数
+                document.getElementById('noteCharCount').textContent = document.getElementById('noteInput').value.length;
+            } finally { 
+                btn.innerText = "✨ AI 智能总结"; 
+                btn.disabled = false; 
+            }
+        }
+
+        async function doUnlockShare() {
+            const pw = document.getElementById('sharePw').value; 
+            const resDiv = document.getElementById('shareResult');
+            try {
+                const res = await fetch(`${API_URL}/api/share/${shareId}`);
+                if (!res.ok) return alert("失效或已被焚毁");
+                const data = await res.json(); 
+                const clearText = await decrypt(data.content, pw);
+                if (clearText) { 
+                    // 渲染 Markdown
+                    resDiv.innerHTML = marked.parse(clearText);
+                    hljs.highlightAll();
+                    resDiv.classList.remove('hidden'); 
+                    document.getElementById('unlockBtn').disabled = true; 
+                    document.getElementById('unlockBtn').innerText = "数据已销毁";
+                }
+                else alert("密码错误");
+            } catch (e) { alert("网络异常"); }
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch(err => console.error('Service Worker Registration Failed', err));
+        }
+
+        init();
+    </script>
+</body>
+
+</html><!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CloudNotes | 2026 隐私加密笔记</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="theme-color" content="#020617">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gradient-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gradient-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .note-card {
+            transition: all 0.3s ease;
+        }
+
+        .note-card:hover {
+            border-color: rgba(59, 130, 246, 0.5);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        /* 隐藏滚动条但保留功能 */
+        ::-webkit-scrollbar {
+            width: 0px;
+        }
+
+        /* Markdown 预览样式 */
+        .markdown-preview {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .markdown-preview h1 {
+            font-size: 2em;
+            font-weight: 800;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .markdown-preview h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-preview h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-preview p {
+            margin-bottom: 1em;
+        }
+
+        .markdown-preview ul, .markdown-preview ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .markdown-preview li {
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-preview code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25em;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .markdown-preview pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1em;
+            border-radius: 0.5em;
+            overflow-x: auto;
+            margin-bottom: 1.5em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .markdown-preview blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1em;
+            margin-left: 0;
+            margin-bottom: 1.5em;
+            color: #94a3b8;
+        }
+
+        .markdown-preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1.5em;
+        }
+
+        .markdown-preview th, .markdown-preview td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75em;
+            text-align: left;
+        }
+
+        .markdown-preview th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+
+        .markdown-preview a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .markdown-preview a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-preview img {
+            max-width: 100%;
+            border-radius: 0.5em;
+            margin-bottom: 1em;
+        }
+
+        .markdown-preview hr {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 2em 0;
+        }
+
+        /* Tab 切换样式 */
+        .tab-button {
+            padding: 0.75em 1.5em;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-radius: 0.5em;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* 代码高亮 */
+        .hljs {
+            background: transparent !important;
+        }
     </style>
 </head>
 
