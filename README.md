@@ -4,7 +4,7 @@
 
 2.创建 **D1 SQL数据库** ，名字随意
 
-3.[SQL代码]([D1初始化.md](https://github.com/mylonggg/my_notes/blob/main/src/D1%E5%88%9D%E5%A7%8B%E5%8C%96.md))
+3.[SQL代码](https://github.com/mylonggg/my_notes/blob/main/src/D1%E5%88%9D%E5%A7%8B%E5%8C%96.md)
 
 ```bash
 
