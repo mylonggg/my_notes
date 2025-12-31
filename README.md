@@ -1,9 +1,12 @@
+#cloudflare建私有笔记
+
 1.创建Workers 和 Pages
 
 2.创建D1 SQL数据库
 
-3.代码
-、、、bash
+3.SQL代码
+
+```bash
 
 DROP TABLE IF EXISTS notes;
 CREATE TABLE IF NOT EXISTS notes (
@@ -14,4 +17,4 @@ CREATE TABLE IF NOT EXISTS notes (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-、、、
+```
