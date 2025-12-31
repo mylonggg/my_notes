@@ -217,10 +217,10 @@
         </div>
     </div>
 
-    <!-- 编辑弹窗 - 调高编辑模式窗口 -->
+    <!-- 编辑弹窗 - 大幅增加文本输入窗口高度 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col">
             <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
                 <span class="text-blue-400">✏️</span> 编辑笔记
                 <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
@@ -243,8 +243,9 @@
                     </div>
                     
                     <div class="flex-1 min-h-0">
+                        <!-- 将文本输入区域高度增加到原来的三倍 -->
                         <textarea id="editNoteContent" 
-                            class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono"
+                            class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono min-h-[60vh]"
                             placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
                     </div>
                     
@@ -256,11 +257,11 @@
                     </div>
                 </div>
                 
-                <div id="previewTab" class="flex-1 overflow-y-auto hidden">
+                <div id="previewTab" class="flex-1 overflow-y-auto hidden min-h-0">
                     <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
                         Markdown 预览
                     </div>
-                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto">
+                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[60vh]">
                         <!-- Markdown 预览内容 -->
                     </div>
                 </div>
