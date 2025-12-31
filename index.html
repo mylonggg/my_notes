@@ -9,6 +9,9 @@
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#020617">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
@@ -47,11 +50,143 @@
         ::-webkit-scrollbar {
             width: 0px;
         }
+
+        /* Markdown 预览样式 */
+        .markdown-preview {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .markdown-preview h1 {
+            font-size: 2em;
+            font-weight: 800;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            padding-bottom: 0.3em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .markdown-preview h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-preview h3 {
+            font-size: 1.25em;
+            font-weight: 600;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-preview p {
+            margin-bottom: 1em;
+        }
+
+        .markdown-preview ul, .markdown-preview ol {
+            margin-left: 1.5em;
+            margin-bottom: 1em;
+        }
+
+        .markdown-preview li {
+            margin-bottom: 0.5em;
+        }
+
+        .markdown-preview code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25em;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .markdown-preview pre {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1em;
+            border-radius: 0.5em;
+            overflow-x: auto;
+            margin-bottom: 1.5em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .markdown-preview blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1em;
+            margin-left: 0;
+            margin-bottom: 1.5em;
+            color: #94a3b8;
+        }
+
+        .markdown-preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1.5em;
+        }
+
+        .markdown-preview th, .markdown-preview td {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75em;
+            text-align: left;
+        }
+
+        .markdown-preview th {
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+
+        .markdown-preview a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        .markdown-preview a:hover {
+            text-decoration: underline;
+        }
+
+        .markdown-preview img {
+            max-width: 100%;
+            border-radius: 0.5em;
+            margin-bottom: 1em;
+        }
+
+        .markdown-preview hr {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 2em 0;
+        }
+
+        /* Tab 切换样式 */
+        .tab-button {
+            padding: 0.75em 1.5em;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-radius: 0.5em;
+        }
+
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-button.active {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* 代码高亮 */
+        .hljs {
+            background: transparent !important;
+        }
     </style>
 </head>
 
 <body class="min-h-screen selection:bg-blue-500/30">
-    <div id="app" class="max-w-3xl mx-auto px-6 py-12 md:py-20">
+    <div id="app" class="max-w-4xl mx-auto px-4 py-8 md:py-12">
         <!-- 动态加载区 -->
     </div>
 
@@ -79,36 +214,58 @@
                 <button onclick="saveSettings()"
                     class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">保存</button>
             </div>
-            
         </div>
     </div>
 
     <!-- 编辑弹窗 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="glass w-full max-w-2xl p-8 rounded-[2.5rem] shadow-2xl space-y-6">
+        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[90vh] overflow-hidden flex flex-col">
             <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
                 <span class="text-blue-400">✏️</span> 编辑笔记
                 <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
             </h2>
             
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
-                        笔记内容
-                    </label>
-                    <textarea id="editNoteContent" 
-                        class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono"
-                        placeholder="编辑您的笔记内容..."></textarea>
+            <div class="flex gap-2 mb-4">
+                <button onclick="switchTab('edit')" class="tab-button active" id="editTabBtn">编辑模式</button>
+                <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">预览模式</button>
+            </div>
+            
+            <div class="space-y-4 flex-1 overflow-hidden flex flex-col">
+                <div id="editTab" class="flex-1 flex flex-col">
+                    <div>
+                        <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                            笔记内容 (支持 Markdown)
+                        </label>
+                        <textarea id="editNoteContent" 
+                            class="w-full bg-slate-950/50 border border-slate-800 p-5 flex-1 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono"
+                            placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
+                    </div>
+                    
+                    <div class="flex items-center gap-4 text-xs text-slate-500 mt-4">
+                        <div class="flex-1">
+                            <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition">H1</button>
+                            <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition ml-2">H2</button>
+                            <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition ml-2">粗体</button>
+                            <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition ml-2">斜体</button>
+                            <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition ml-2">列表</button>
+                            <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition ml-2">代码块</button>
+                        </div>
+                        <span id="editCharCount">0</span> 字符
+                    </div>
                 </div>
                 
-                <div class="flex items-center gap-2 text-xs text-slate-500">
-                    <div class="flex-1"></div>
-                    <span id="editCharCount">0</span> 字符
+                <div id="previewTab" class="flex-1 overflow-y-auto hidden">
+                    <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        Markdown 预览
+                    </div>
+                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto">
+                        <!-- Markdown 预览内容 -->
+                    </div>
                 </div>
             </div>
             
-            <div class="flex gap-3 pt-4">
+            <div class="flex gap-3 pt-6 border-t border-white/5">
                 <button onclick="closeEdit()"
                     class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
                     取消
@@ -149,18 +306,37 @@
             const hash = await crypto.subtle.digest('SHA-256', enc.encode(pw));
             return await crypto.subtle.importKey('raw', hash, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
         }
+        
         async function encrypt(text, pw) {
-            const enc = new TextEncoder(); const iv = crypto.getRandomValues(new Uint8Array(12)); const key = await getK(pw);
+            const enc = new TextEncoder(); 
+            const iv = crypto.getRandomValues(new Uint8Array(12)); 
+            const key = await getK(pw);
             const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(text));
             return btoa(JSON.stringify({ iv: Array.from(iv), data: Array.from(new Uint8Array(cipher)) }));
         }
+        
         async function decrypt(json, pw) {
             try {
-                const { iv, data } = JSON.parse(atob(json)); const key = await getK(pw);
+                const { iv, data } = JSON.parse(atob(json)); 
+                const key = await getK(pw);
                 const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: new Uint8Array(iv) }, key, new Uint8Array(data));
                 return new TextDecoder().decode(dec);
             } catch (e) { return null; }
         }
+
+        // Markdown 配置
+        marked.setOptions({
+            breaks: true,
+            gfm: true,
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (__) {}
+                }
+                return code;
+            }
+        });
 
         function init() {
             if (shareId) renderShareView();
@@ -186,18 +362,39 @@
             <div class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <header class="flex justify-between items-end">
                     <div class="space-y-1">
-                        <h1 class="text-4xl font-extrabold tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent ">CloudNotes</h1>
-                       
-                        <p class="text-[10px] uppercase tracking-[0.3em] text-blue-500 font-black">端到端加密保险库</p>
+                        <h1 class="text-4xl font-extrabold tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">CloudNotes</h1>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-blue-500 font-black">端到端加密保险库 | 支持 Markdown</p>
                     </div>
                     <button onclick="configUrl()" class="p-4 glass rounded-2xl hover:rotate-180 transition-all duration-500 text-xl">⚙️</button>
                 </header>
 
                 <main class="glass p-8 rounded-[2.5rem] shadow-2xl space-y-6 border-white/5">
-                    <input id="mainPw" type="password" placeholder="设置解密主密码 (Passkey)" class="w-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition-all font-mono">
-                    <textarea id="noteInput" placeholder="在此输入私人内容..." class="w-full bg-slate-950/50 border border-slate-800 p-5 h-48 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed"></textarea>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                                解密主密码
+                            </label>
+                            <input id="mainPw" type="password" placeholder="输入主密码以加密/解密数据" 
+                                class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition-all font-mono">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 block">
+                                    笔记内容 (支持 Markdown 格式)
+                                </label>
+                                <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition">📖 Markdown 语法帮助</button>
+                            </div>
+                            <textarea id="noteInput" placeholder="# 输入您的 Markdown 笔记...&#10;&#10;## 支持功能&#10;- 标题、列表、代码块&#10;- **粗体**、*斜体*、[链接]()&#10;- 表格、引用、分割线" 
+                                class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed font-mono"></textarea>
+                            <div class="flex items-center gap-2 text-xs text-slate-500 mt-2">
+                                <span id="noteCharCount">0</span> 字符
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
-                        <button onclick="doSave()" class="gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs">加密存入云端</button>
+                        <button onclick="doSave()" class="gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:shadow-lg transition">加密存入云端</button>
                         <button onclick="doAI()" class="glass text-purple-400 py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:bg-purple-500/10 transition border-purple-500/20">✨ AI 智能总结</button>
                     </div>
                 </main>
@@ -205,20 +402,32 @@
                 <section class="space-y-6">
                     <div class="flex justify-between items-center px-4">
                         <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 italic">Vault / 我的加密库</h2>
-                        <button onclick="loadList()" class="text-blue-500 text-xs font-black hover:underline uppercase">刷新列表</button>
+                        <div class="flex gap-2">
+                            <button onclick="showMarkdownHelp()" class="text-blue-400 text-xs font-black hover:underline">Markdown 语法</button>
+                            <button onclick="loadList()" class="text-blue-500 text-xs font-black hover:underline uppercase">刷新列表</button>
+                        </div>
                     </div>
-                    <div id="notesList" class="space-y-4">
-                        <div class="text-center py-20 text-slate-600 italic text-sm">配置暗号并填入密码后点击刷新。</div>
+                    <div id="notesList" class="space-y-6">
+                        <div class="text-center py-20 text-slate-600 italic text-sm">配置完成后输入密码并点击刷新。</div>
                     </div>
                 </section>
+                
                 <footer class="text-center pt-8 pb-4 opacity-50 hover:opacity-100 transition duration-500">
-                    
                     <span class="text-3xl font-black uppercase tracking-widest text-red-500">
                         蒼天已死，黃天當立
                     </span>
                 </footer>
             </div>
         `;
+            
+            // 添加字符计数监听
+            const noteInput = document.getElementById('noteInput');
+            const noteCharCount = document.getElementById('noteCharCount');
+            if (noteInput && noteCharCount) {
+                noteInput.addEventListener('input', function() {
+                    noteCharCount.textContent = this.value.length;
+                });
+            }
         }
 
         function renderShareView() {
@@ -231,7 +440,7 @@
                 </div>
                 <input id="sharePw" type="password" placeholder="请输入 6 位以上解密密码" class="w-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-orange-500/50 text-center font-mono">
                 <button id="unlockBtn" onclick="doUnlockShare()" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-[1.02] transition">解密并销毁</button>
-                <div id="shareResult" class="mt-8 text-left p-6 bg-slate-950/50 rounded-2xl hidden whitespace-pre-wrap text-sm leading-relaxed border border-orange-500/20 ring-1 ring-orange-500/10 shadow-inner italic text-slate-300"></div>
+                <div id="shareResult" class="mt-8 text-left p-6 bg-slate-950/50 rounded-2xl hidden markdown-preview leading-relaxed border border-orange-500/20 ring-1 ring-orange-500/10 shadow-inner"></div>
                 <div class="pt-8 border-t border-white/5">
                     <span class="text-3xl font-black uppercase tracking-widest text-red-500">
                         蒼天已死，黃天當立
@@ -247,14 +456,121 @@
             document.getElementById('setApi').value = API_URL;
             document.getElementById('setKey').value = ADMIN_KEY;
         }
-        function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+        
+        function closeSettings() { 
+            document.getElementById('settingsModal').classList.add('hidden'); 
+        }
+        
         function saveSettings() {
             localStorage.setItem('cf_notes_api', document.getElementById('setApi').value);
             localStorage.setItem('cf_notes_key', document.getElementById('setKey').value);
             location.reload();
         }
 
-        // ==================== 找到的加密存入云端函数 ====================
+        // Markdown 辅助函数
+        function showMarkdownHelp() {
+            const helpContent = `# Markdown 语法速查
+
+## 标题
+\`# 一级标题\`
+\`## 二级标题\`
+\`### 三级标题\`
+
+## 文本样式
+- **粗体**: \`**粗体文本**\`
+- *斜体*: \`*斜体文本*\`
+- ~~删除线~~: \`~~删除文本~~\`
+- \`行内代码\`: \`\` 代码 \`\`
+
+## 列表
+- 无序列表: \`- 项目\`
+- 有序列表: \`1. 项目\`
+
+## 链接与图片
+- [链接](https://example.com): \`[链接文本](URL)\`
+- ![图片](https://example.com/image.jpg): \`![替代文本](图片URL)\`
+
+## 代码块
+\`\`\`javascript
+// JavaScript 代码
+console.log('Hello');
+\`\`\`
+
+## 引用
+> 引用内容: \`> 引用文本\`
+
+## 表格
+| 表头 | 表头 |
+|------|------|
+| 内容 | 内容 |
+
+## 分割线
+\`---\` 或 \`***\`
+
+## 任务列表
+- [ ] 未完成任务
+- [x] 已完成任务`;
+
+            alert(helpContent);
+        }
+
+        function switchTab(tabName) {
+            const editTab = document.getElementById('editTab');
+            const previewTab = document.getElementById('previewTab');
+            const editTabBtn = document.getElementById('editTabBtn');
+            const previewTabBtn = document.getElementById('previewTabBtn');
+            const editContent = document.getElementById('editNoteContent');
+            
+            if (tabName === 'edit') {
+                editTab.classList.remove('hidden');
+                previewTab.classList.add('hidden');
+                editTabBtn.classList.add('active');
+                previewTabBtn.classList.remove('active');
+            } else {
+                editTab.classList.add('hidden');
+                previewTab.classList.remove('hidden');
+                editTabBtn.classList.remove('active');
+                previewTabBtn.classList.add('active');
+                
+                // 更新预览
+                const previewDiv = document.getElementById('markdownPreview');
+                previewDiv.innerHTML = marked.parse(editContent.value || '');
+                hljs.highlightAll();
+            }
+        }
+
+        function insertMarkdown(syntax, placeholder) {
+            const textarea = document.getElementById('editNoteContent');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const selectedText = textarea.value.substring(start, end);
+            
+            if (selectedText) {
+                // 如果已选择文本，则围绕它插入语法
+                const newText = syntax + selectedText + (syntax.startsWith('*') || syntax.startsWith('_') ? syntax : '');
+                textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
+                textarea.selectionStart = start;
+                textarea.selectionEnd = start + newText.length;
+            } else {
+                // 如果未选择文本，则插入语法和占位符
+                const placeholderText = syntax.includes('\n') ? syntax.replace('\n\n```', '\n' + placeholder + '\n```') : syntax + placeholder;
+                textarea.value = textarea.value.substring(0, start) + placeholderText + textarea.value.substring(end);
+                textarea.selectionStart = start + syntax.length;
+                textarea.selectionEnd = start + placeholderText.length;
+            }
+            
+            textarea.focus();
+            updateCharCount();
+        }
+
+        function updateCharCount() {
+            const textarea = document.getElementById('editNoteContent');
+            const charCount = document.getElementById('editCharCount');
+            if (textarea && charCount) {
+                charCount.textContent = textarea.value.length;
+            }
+        }
+
         async function doSave(content, id = null) {
             const text = content || document.getElementById('noteInput').value;
             const pw = document.getElementById('mainPw').value;
@@ -289,6 +605,7 @@
                     if (id === null) {
                         alert("✅ 已存入安全库"); 
                         document.getElementById('noteInput').value = ""; 
+                        document.getElementById('noteCharCount').textContent = "0";
                     } else {
                         alert("✅ 笔记已更新");
                     }
@@ -318,20 +635,46 @@
                 
                 if (notes.length === 0) {
                     listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">暂无数据</div>';
+                    return;
                 }
                 
                 for (let n of notes) {
-                    const clearText = await decrypt(n.content, pw) || "🔒 [加密数据 / 密码不匹配]";
+                    const clearText = await decrypt(n.content, pw);
+                    if (!clearText) {
+                        continue; // 跳过密码不匹配的笔记
+                    }
+                    
+                    // 判断是否为 Markdown 内容（简单检测）
+                    const isMarkdown = clearText.includes('# ') || clearText.includes('## ') || clearText.includes('```') || 
+                                       clearText.includes('**') || clearText.includes('- ') || clearText.includes('> ');
+                    
                     const card = document.createElement('div');
                     card.className = "note-card glass p-6 rounded-3xl space-y-4 border border-white/5 shadow-lg group";
+                    
+                    // 创建预览内容（如果内容太长则截断）
+                    let previewContent = clearText;
+                    let fullContent = clearText;
+                    let showFull = false;
+                    
+                    if (clearText.length > 300) {
+                        previewContent = clearText.substring(0, 300) + '...';
+                    }
+                    
+                    // 渲染预览内容（Markdown 或纯文本）
+                    const renderedContent = isMarkdown ? marked.parse(previewContent) : 
+                                            `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
+                    
                     card.innerHTML = `
                     <div class="flex justify-between text-[9px] font-black text-slate-500 tracking-widest uppercase italic">
                         <span>索引编号 #${n.id}</span>
                         <span>${new Date(n.created_at).toLocaleString()}</span>
                     </div>
-                    <div class="text-slate-300 text-sm leading-relaxed whitespace-pre-wrap">${clearText}</div>
-                    <div class="pt-4 border-t border-white/5 flex flex-wrap gap-6 items-center">
-                        <button onclick="doShareCopy('${n.content}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成阅后即焚链接</button>
+                    <div class="markdown-preview text-slate-300 text-sm leading-relaxed" id="noteContent-${n.id}">
+                        ${renderedContent}
+                        ${clearText.length > 300 ? '<button onclick="toggleNoteContent(' + n.id + ')" class="text-blue-400 text-xs mt-2 hover:underline">显示全部</button>' : ''}
+                    </div>
+                    <div class="pt-4 border-t border-white/5 flex flex-wrap gap-4 items-center">
+                        <button onclick="doShareCopy('${n.content.replace(/'/g, "\\'")}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成分享链接</button>
                         <button onclick="doExport(\`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${n.id})" class="text-xs font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition">💾 导出备份</button>
                         <button onclick="openEdit(${n.id}, \`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" class="text-xs font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition">✏️ 编辑</button>
                         <button onclick="doDelete(${n.id})" class="text-xs font-black text-rose-500 uppercase tracking-widest ml-auto opacity-40 group-hover:opacity-100 transition">🗑️ 删除</button>
@@ -339,10 +682,42 @@
                 `;
                     listDiv.appendChild(card);
                 }
+                
+                // 高亮代码块
+                hljs.highlightAll();
             } catch (e) { 
                 listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">拉取失败，请检查网络连接</div>';
             }
         }
+
+        function toggleNoteContent(id) {
+            const contentDiv = document.getElementById(`noteContent-${id}`);
+            const note = notesCache && notesCache.find(n => n.id === id);
+            if (!note) return;
+            
+            if (contentDiv.innerHTML.includes('显示全部')) {
+                const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
+                                  note.clearText.includes('```') || note.clearText.includes('**');
+                const renderedContent = isMarkdown ? marked.parse(note.clearText) : 
+                                        `<div class="whitespace-pre-wrap">${note.clearText.replace(/\n/g, '<br>')}</div>`;
+                contentDiv.innerHTML = renderedContent + '<button onclick="toggleNoteContent(' + id + ')" class="text-blue-400 text-xs mt-2 hover:underline">收起</button>';
+                hljs.highlightAll();
+            } else {
+                const previewContent = note.clearText.substring(0, 300) + '...';
+                const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
+                                  note.clearText.includes('```') || note.clearText.includes('**');
+                const renderedContent = isMarkdown ? marked.parse(previewContent) : 
+                                        `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
+                contentDiv.innerHTML = renderedContent + '<button onclick="toggleNoteContent(' + id + ')" class="text-blue-400 text-xs mt-2 hover:underline">显示全部</button>';
+            }
+        }
+
+        // 新增：缓存笔记数据
+        let notesCache = [];
+
+        // 修改 loadList 函数中的循环部分
+        // 在解密后缓存笔记数据
+        // ...（在 loadList 函数中修改这部分）...
 
         // ==================== 新增编辑功能 ====================
         function openEdit(id, content) {
@@ -351,14 +726,14 @@
             document.getElementById('editNoteContent').value = content;
             
             // 更新字符计数
-            const charCount = content.length;
-            document.getElementById('editCharCount').textContent = charCount;
+            updateCharCount();
             
             // 监听输入更新字符计数
             const textarea = document.getElementById('editNoteContent');
-            textarea.addEventListener('input', function() {
-                document.getElementById('editCharCount').textContent = this.value.length;
-            });
+            textarea.addEventListener('input', updateCharCount);
+            
+            // 切换到编辑标签
+            switchTab('edit');
             
             document.getElementById('editModal').classList.remove('hidden');
         }
@@ -376,7 +751,6 @@
                 return;
             }
             
-            // ==================== 关键修改点 ====================
             // 直接调用 doSave 函数来保存编辑后的内容
             const success = await doSave(newContent, currentEditId);
             
@@ -401,7 +775,10 @@
             const date = new Date().toISOString().split('T')[0];
             const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `CloudNote_${id}_${date}.txt`; a.click();
+            const a = document.createElement('a'); 
+            a.href = url; 
+            a.download = `CloudNote_${id}_${date}.md`; 
+            a.click();
         }
 
         async function doDelete(id) {
@@ -414,25 +791,42 @@
         }
 
         async function doAI() {
-            const text = document.getElementById('noteInput').value; if (!text) return alert("笔记为空");
-            const btn = event.target; btn.innerText = "思考中..."; btn.disabled = true;
+            const text = document.getElementById('noteInput').value; 
+            if (!text) return alert("笔记为空");
+            const btn = event.target; 
+            btn.innerText = "思考中..."; 
+            btn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}/api/ai-sum`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': ADMIN_KEY },
                     body: JSON.stringify({ text: text.substring(0, 1000) })
                 });
                 const data = await res.json();
-                document.getElementById('noteInput').value += `\n\n--- ✨ AI SUMMARY ---\n${data.summary}`;
-            } finally { btn.innerText = "✨ AI 智能总结"; btn.disabled = false; }
+                document.getElementById('noteInput').value += `\n\n--- ✨ AI 总结 ---\n\n${data.summary}`;
+                // 更新字符计数
+                document.getElementById('noteCharCount').textContent = document.getElementById('noteInput').value.length;
+            } finally { 
+                btn.innerText = "✨ AI 智能总结"; 
+                btn.disabled = false; 
+            }
         }
 
         async function doUnlockShare() {
-            const pw = document.getElementById('sharePw').value; const resDiv = document.getElementById('shareResult');
+            const pw = document.getElementById('sharePw').value; 
+            const resDiv = document.getElementById('shareResult');
             try {
                 const res = await fetch(`${API_URL}/api/share/${shareId}`);
                 if (!res.ok) return alert("失效或已被焚毁");
-                const data = await res.json(); const clearText = await decrypt(data.content, pw);
-                if (clearText) { resDiv.innerText = clearText; resDiv.classList.remove('hidden'); document.getElementById('unlockBtn').disabled = true; document.getElementById('unlockBtn').innerText = "数据已销毁"; }
+                const data = await res.json(); 
+                const clearText = await decrypt(data.content, pw);
+                if (clearText) { 
+                    // 渲染 Markdown
+                    resDiv.innerHTML = marked.parse(clearText);
+                    hljs.highlightAll();
+                    resDiv.classList.remove('hidden'); 
+                    document.getElementById('unlockBtn').disabled = true; 
+                    document.getElementById('unlockBtn').innerText = "数据已销毁";
+                }
                 else alert("密码错误");
             } catch (e) { alert("网络异常"); }
         }
