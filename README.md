@@ -1,8 +1,8 @@
 # cloudflare建私有笔记
 
-1.创建**Workers** 
+1.创建 **Workers** 
 
-2.创建**D1 SQL数据库**，名字随意
+2.创建 **D1 SQL数据库** ，名字随意
 
 3.SQL代码
 
