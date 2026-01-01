@@ -15,5 +15,6 @@
 7.绑定自定域，然后添加一个环境变量（密码用于绑定数据库）类型：密钥，变量名`ADMIN_KEY`,值设置成你想要的密码
 ## 创建前端
 
-1.在github里
-新建Pages 连接github账号，选项目名称，然后绑定自定域
+1.在github里[index.html](https://github.com/mylonggg/my_notes/blob/main/index.html)中 `const ENV_PASSWORD = "CLOUDNOTES_ACCESS_2026"`把`CLOUDNOTES_ACCESS_2026`改成自己密码;
+
+2.新建Pages 连接github账号，选项目名称，然后绑定自定域
