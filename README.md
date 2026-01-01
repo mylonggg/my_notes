@@ -18,3 +18,7 @@
 1.在github里[index.html](https://github.com/mylonggg/my_notes/blob/main/index.html)中 `const ENV_PASSWORD = "CLOUDNOTES_ACCESS_2026"`把`CLOUDNOTES_ACCESS_2026`改成自己密码;
 
 2.新建Pages 连接github账号，选项目名称，然后绑定自定域
+
+3.输入前端`const ENV_PASSWORD`密码进入初始设置
+
+3.初化设置，绑定前端的自定域，密码为：`ADMIN_KEY`的密码
