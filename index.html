@@ -182,12 +182,71 @@
         .hljs {
             background: transparent !important;
         }
+        
+        /* 登录界面样式 */
+        .login-shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .login-bg {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        }
     </style>
 </head>
 
 <body class="min-h-screen selection:bg-blue-500/30">
-    <div id="app" class="max-w-4xl mx-auto px-4 py-8 md:py-12">
-        <!-- 动态加载区 -->
+    <!-- 密码验证弹窗 -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 login-bg">
+        <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl space-y-8">
+            <div class="text-center space-y-4">
+                <div class="inline-flex p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-5xl">🔐</div>
+                <div class="space-y-2">
+                    <h1 class="text-3xl font-extrabold tracking-tight italic">CloudNotes</h1>
+                    <p class="text-slate-400 leading-relaxed text-sm">私有加密笔记系统<br>请输入访问密码以继续</p>
+                </div>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="space-y-3">
+                    <label class="text-xs uppercase tracking-widest text-slate-400 font-bold ml-1">
+                        访问密码
+                        <span id="attemptsCount" class="text-rose-500 text-xs ml-2">剩余尝试次数: 5</span>
+                    </label>
+                    <input id="authPassword" type="password" 
+                           class="w-full bg-slate-900/70 border border-slate-700 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-center font-mono text-lg"
+                           placeholder="请输入密码"
+                           autocomplete="off"
+                           onkeydown="if(event.key === 'Enter') checkPassword()">
+                    <p class="text-xs text-slate-500 text-center">
+                        提示：请联系管理员获取访问密码
+                    </p>
+                </div>
+                
+                <button onclick="checkPassword()" 
+                        class="w-full gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-sm shadow-xl hover:shadow-2xl transition-all">
+                    验证身份
+                </button>
+                
+                <div class="pt-6 border-t border-white/5 text-center">
+                    <p class="text-xs text-slate-500">
+                        🔒 安全提示：请勿在公共设备上保存密码
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用界面 -->
+    <div id="appContainer" class="hidden">
+        <div id="app" class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+            <!-- 动态加载区 -->
+        </div>
     </div>
 
     <!-- 极简设置弹窗 -->
@@ -225,12 +284,12 @@
                 <span class="text-blue-400">✏️</span> 编辑笔记
                 <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
             </h2>
-
+            
             <div class="flex gap-2 mb-4">
                 <button onclick="switchTab('edit')" class="tab-button active" id="editTabBtn">编辑模式</button>
                 <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">预览模式</button>
             </div>
-
+            
             <div class="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
                 <div id="editTab" class="flex-1 flex flex-col min-h-0">
                     <div class="flex gap-2 flex-wrap mb-3">
@@ -241,15 +300,14 @@
                         <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">列表</button>
                         <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm">代码块</button>
                     </div>
-
+                    
                     <div class="flex-1 min-h-0">
                         <!-- 将文本输入区域高度增加到原来的三倍 -->
                         <textarea id="editNoteContent" 
-                           
-                            class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono min-h-[45vh]"
+                            class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono min-h-[60vh]"
                             placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
                     </div>
-
+                    
                     <div class="flex items-center gap-4 text-xs text-slate-500 mt-3">
                         <div class="flex-1">
                             <button onclick="showMarkdownHelp()" class="text-blue-400 hover:text-blue-300 transition text-sm">📖 Markdown 语法帮助</button>
@@ -257,7 +315,7 @@
                         <span id="editCharCount">0</span> 字符
                     </div>
                 </div>
-
+                
                 <div id="previewTab" class="flex-1 overflow-y-auto hidden min-h-0">
                     <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
                         Markdown 预览
@@ -267,7 +325,7 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="flex gap-3 pt-6 border-t border-white/5">
                 <button onclick="closeEdit()"
                     class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
@@ -278,7 +336,7 @@
                     保存更改
                 </button>
             </div>
-
+            
             <div class="pt-4 border-t border-white/5 text-xs text-slate-500">
                 <p class="flex items-center gap-2">
                     <span class="text-yellow-400">⚠️</span>
@@ -289,6 +347,193 @@
     </div>
 
     <script>
+        // ==================== 密码验证配置 ====================
+        // 环境变量密码（生产环境建议通过构建时注入或通过API获取）
+        const ENV_PASSWORD = "0.123@Com"; // 默认密码，建议在生产环境修改
+        
+        // 会话存储密钥
+        const SESSION_KEY = 'cloudnotes_auth_token';
+        const ATTEMPTS_KEY = 'cloudnotes_auth_attempts';
+        
+        // 最大尝试次数
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 300000; // 5分钟（毫秒）
+        const LOCKOUT_KEY = 'cloudnotes_lockout_until';
+        
+        // 检查是否在锁定状态
+        function checkLockout() {
+            const lockoutUntil = localStorage.getItem(LOCKOUT_KEY);
+            if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
+                const remainingMinutes = Math.ceil((parseInt(lockoutUntil) - Date.now()) / 60000);
+                return {
+                    locked: true,
+                    remainingMinutes: remainingMinutes
+                };
+            }
+            return { locked: false };
+        }
+        
+        // 设置锁定状态
+        function setLockout() {
+            const lockoutUntil = Date.now() + LOCKOUT_TIME;
+            localStorage.setItem(LOCKOUT_KEY, lockoutUntil.toString());
+            
+            // 5分钟后自动清除锁定
+            setTimeout(() => {
+                localStorage.removeItem(LOCKOUT_KEY);
+                localStorage.removeItem(ATTEMPTS_KEY);
+                location.reload();
+            }, LOCKOUT_TIME);
+        }
+        
+        // 获取剩余尝试次数
+        function getRemainingAttempts() {
+            const attempts = localStorage.getItem(ATTEMPTS_KEY);
+            return attempts ? MAX_ATTEMPTS - parseInt(attempts) : MAX_ATTEMPTS;
+        }
+        
+        // 增加失败尝试
+        function incrementFailedAttempts() {
+            let attempts = localStorage.getItem(ATTEMPTS_KEY);
+            attempts = attempts ? parseInt(attempts) + 1 : 1;
+            localStorage.setItem(ATTEMPTS_KEY, attempts.toString());
+            
+            // 如果达到最大尝试次数，锁定
+            if (attempts >= MAX_ATTEMPTS) {
+                setLockout();
+            }
+            
+            return attempts;
+        }
+        
+        // 重置失败尝试
+        function resetFailedAttempts() {
+            localStorage.removeItem(ATTEMPTS_KEY);
+            localStorage.removeItem(LOCKOUT_KEY);
+        }
+        
+        // 验证密码
+        function checkPassword() {
+            const lockoutCheck = checkLockout();
+            if (lockoutCheck.locked) {
+                const input = document.getElementById('authPassword');
+                const attemptsCount = document.getElementById('attemptsCount');
+                attemptsCount.innerHTML = `账户已锁定，${lockoutCheck.remainingMinutes}分钟后重试`;
+                input.value = '';
+                input.classList.add('login-shake');
+                setTimeout(() => input.classList.remove('login-shake'), 500);
+                return;
+            }
+            
+            const input = document.getElementById('authPassword');
+            const password = input.value.trim();
+            const attemptsCount = document.getElementById('attemptsCount');
+            const remainingAttempts = getRemainingAttempts() - 1;
+            
+            if (!password) {
+                attemptsCount.innerHTML = '密码不能为空';
+                input.classList.add('login-shake');
+                setTimeout(() => {
+                    input.classList.remove('login-shake');
+                    attemptsCount.innerHTML = `剩余尝试次数: ${remainingAttempts + 1}`;
+                }, 500);
+                return;
+            }
+            
+            // 验证密码（生产环境中应该从服务器验证）
+            if (password === ENV_PASSWORD) {
+                // 创建会话令牌
+                const token = btoa(Date.now() + '-' + Math.random().toString(36).substr(2));
+                sessionStorage.setItem(SESSION_KEY, token);
+                
+                // 重置失败尝试
+                resetFailedAttempts();
+                
+                // 显示主应用界面
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                
+                // 设置会话超时（8小时）
+                setTimeout(() => {
+                    if (confirm('会话已过期，是否重新登录？')) {
+                        logout();
+                    }
+                }, 8 * 60 * 60 * 1000);
+                
+                // 初始化应用
+                initApp();
+            } else {
+                // 密码错误
+                const attempts = incrementFailedAttempts();
+                const newRemaining = MAX_ATTEMPTS - attempts;
+                
+                if (attempts >= MAX_ATTEMPTS) {
+                    attemptsCount.innerHTML = '账户已锁定，5分钟后重试';
+                    setLockout();
+                } else {
+                    attemptsCount.innerHTML = `密码错误，剩余尝试次数: ${newRemaining}`;
+                }
+                
+                input.value = '';
+                input.classList.add('login-shake');
+                setTimeout(() => input.classList.remove('login-shake'), 500);
+                
+                // 清空输入框
+                input.value = '';
+            }
+        }
+        
+        // 登出
+        function logout() {
+            sessionStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(ATTEMPTS_KEY);
+            localStorage.removeItem(LOCKOUT_KEY);
+            location.reload();
+        }
+        
+        // 检查会话
+        function checkSession() {
+            const token = sessionStorage.getItem(SESSION_KEY);
+            if (token) {
+                try {
+                    // 简单的token验证（生产环境需要更复杂的验证）
+                    const parts = atob(token).split('-');
+                    if (parts.length === 2) {
+                        const timestamp = parseInt(parts[0]);
+                        const now = Date.now();
+                        // 检查token是否过期（24小时）
+                        if (now - timestamp < 24 * 60 * 60 * 1000) {
+                            document.getElementById('authModal').classList.add('hidden');
+                            document.getElementById('appContainer').classList.remove('hidden');
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Token验证失败:', e);
+                }
+            }
+            
+            // 显示登录界面
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+            
+            // 检查锁定状态
+            const lockoutCheck = checkLockout();
+            if (lockoutCheck.locked) {
+                const attemptsCount = document.getElementById('attemptsCount');
+                attemptsCount.innerHTML = `账户已锁定，${lockoutCheck.remainingMinutes}分钟后重试`;
+                document.getElementById('authPassword').disabled = true;
+            } else {
+                const remaining = getRemainingAttempts();
+                const attemptsCount = document.getElementById('attemptsCount');
+                attemptsCount.innerHTML = `剩余尝试次数: ${remaining}`;
+                document.getElementById('authPassword').disabled = false;
+            }
+            
+            return false;
+        }
+        
+        // ==================== 原有应用代码 ====================
         const urlParams = new URLSearchParams(window.location.search);
         let apiFromUrl = urlParams.get('api');
         const cfgFromUrl = urlParams.get('cfg');
@@ -311,7 +556,7 @@
             const hash = await crypto.subtle.digest('SHA-256', enc.encode(pw));
             return await crypto.subtle.importKey('raw', hash, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
         }
-
+        
         async function encrypt(text, pw) {
             const enc = new TextEncoder(); 
             const iv = crypto.getRandomValues(new Uint8Array(12)); 
@@ -319,7 +564,7 @@
             const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(text));
             return btoa(JSON.stringify({ iv: Array.from(iv), data: Array.from(new Uint8Array(cipher)) }));
         }
-
+        
         async function decrypt(json, pw) {
             try {
                 const { iv, data } = JSON.parse(atob(json)); 
@@ -343,7 +588,7 @@
             }
         });
 
-        function init() {
+        function initApp() {
             if (shareId) renderShareView();
             else if (!API_URL) renderWelcomeView();
             else renderMainView();
@@ -370,7 +615,12 @@
                         <h1 class="text-4xl font-extrabold tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">CloudNotes</h1>
                         <p class="text-[10px] uppercase tracking-[0.3em] text-blue-500 font-black">端到端加密保险库 | 支持 Markdown</p>
                     </div>
-                    <button onclick="configUrl()" class="p-4 glass rounded-2xl hover:rotate-180 transition-all duration-500 text-xl">⚙️</button>
+                    <div class="flex items-center gap-4">
+                        <button onclick="logout()" class="text-xs text-slate-400 hover:text-white transition px-3 py-1 glass rounded-full" title="退出登录">
+                            退出
+                        </button>
+                        <button onclick="configUrl()" class="p-4 glass rounded-2xl hover:rotate-180 transition-all duration-500 text-xl">⚙️</button>
+                    </div>
                 </header>
 
                 <main class="glass p-8 rounded-[2.5rem] shadow-2xl space-y-6 border-white/5">
@@ -424,7 +674,7 @@
                 </footer>
             </div>
         `;
-
+            
             // 添加字符计数监听
             const noteInput = document.getElementById('noteInput');
             const noteCharCount = document.getElementById('noteCharCount');
@@ -461,11 +711,11 @@
             document.getElementById('setApi').value = API_URL;
             document.getElementById('setKey').value = ADMIN_KEY;
         }
-
+        
         function closeSettings() { 
             document.getElementById('settingsModal').classList.add('hidden'); 
         }
-
+        
         function saveSettings() {
             localStorage.setItem('cf_notes_api', document.getElementById('setApi').value);
             localStorage.setItem('cf_notes_key', document.getElementById('setKey').value);
@@ -525,7 +775,7 @@ console.log('Hello');
             const editTabBtn = document.getElementById('editTabBtn');
             const previewTabBtn = document.getElementById('previewTabBtn');
             const editContent = document.getElementById('editNoteContent');
-
+            
             if (tabName === 'edit') {
                 editTab.classList.remove('hidden');
                 previewTab.classList.add('hidden');
@@ -536,7 +786,7 @@ console.log('Hello');
                 previewTab.classList.remove('hidden');
                 editTabBtn.classList.remove('active');
                 previewTabBtn.classList.add('active');
-
+                
                 // 更新预览
                 const previewDiv = document.getElementById('markdownPreview');
                 previewDiv.innerHTML = marked.parse(editContent.value || '');
@@ -549,7 +799,7 @@ console.log('Hello');
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const selectedText = textarea.value.substring(start, end);
-
+            
             if (selectedText) {
                 // 如果已选择文本，则围绕它插入语法
                 const newText = syntax + selectedText + (syntax.startsWith('*') || syntax.startsWith('_') ? syntax : '');
@@ -563,7 +813,7 @@ console.log('Hello');
                 textarea.selectionStart = start + syntax.length;
                 textarea.selectionEnd = start + placeholderText.length;
             }
-
+            
             textarea.focus();
             updateCharCount();
         }
@@ -579,24 +829,24 @@ console.log('Hello');
         async function doSave(content, id = null) {
             const text = content || document.getElementById('noteInput').value;
             const pw = document.getElementById('mainPw').value;
-
+            
             if (!text || !pw) {
                 alert("请填写内容和密码");
                 return null;
             }
-
+            
             try {
                 // 加密内容
                 const cipher = await encrypt(text, pw);
-
+                
                 // 构建请求体
                 const body = { content: cipher };
-
+                
                 // 如果是编辑模式，添加ID
                 if (id !== null) {
                     body.id = id;
                 }
-
+                
                 const res = await fetch(`${API_URL}/api/save`, {
                     method: 'POST', 
                     headers: { 
@@ -605,7 +855,7 @@ console.log('Hello');
                     },
                     body: JSON.stringify(body)
                 });
-
+                
                 if (res.ok) { 
                     if (id === null) {
                         alert("✅ 已存入安全库"); 
@@ -629,56 +879,56 @@ console.log('Hello');
         async function loadList() {
             const pw = document.getElementById('mainPw').value; 
             if (!pw) return alert("请输入密码解密");
-
+            
             const listDiv = document.getElementById('notesList');
             listDiv.innerHTML = '<div class="text-center py-12 text-slate-600 italic text-sm">加载中...</div>';
-
+            
             try {
                 const res = await fetch(`${API_URL}/api/list`, { headers: { 'Authorization': ADMIN_KEY } });
                 const notes = await res.json(); 
                 listDiv.innerHTML = "";
-
+                
                 if (notes.length === 0) {
                     listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">暂无数据</div>';
                     return;
                 }
-
+                
                 // 清空缓存
                 notesCache = {};
-
+                
                 for (let n of notes) {
                     const clearText = await decrypt(n.content, pw);
                     if (!clearText) {
                         continue; // 跳过密码不匹配的笔记
                     }
-
+                    
                     // 缓存笔记内容
                     notesCache[n.id] = {
                         id: n.id,
                         clearText: clearText,
                         created_at: n.created_at
                     };
-
+                    
                     // 判断是否为 Markdown 内容（简单检测）
                     const isMarkdown = clearText.includes('# ') || clearText.includes('## ') || clearText.includes('```') || 
                                        clearText.includes('**') || clearText.includes('- ') || clearText.includes('> ');
-
+                    
                     const card = document.createElement('div');
                     card.className = "note-card glass p-6 rounded-3xl space-y-4 border border-white/5 shadow-lg group";
-
+                    
                     // 创建预览内容（如果内容太长则截断）
                     let previewContent = clearText;
                     let showFullButton = false;
-
+                    
                     if (clearText.length > 300) {
                         previewContent = clearText.substring(0, 300) + '...';
                         showFullButton = true;
                     }
-
+                    
                     // 渲染预览内容（Markdown 或纯文本）
                     const renderedContent = isMarkdown ? marked.parse(previewContent) : 
                                             `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
-
+                    
                     card.innerHTML = `
                     <div class="flex justify-between text-[9px] font-black text-slate-500 tracking-widest uppercase italic">
                         <span>索引编号 #${n.id}</span>
@@ -697,7 +947,7 @@ console.log('Hello');
                 `;
                     listDiv.appendChild(card);
                 }
-
+                
                 // 高亮代码块
                 hljs.highlightAll();
             } catch (e) { 
@@ -710,27 +960,27 @@ console.log('Hello');
         function toggleNoteContent(id) {
             const contentDiv = document.getElementById(`noteContent-${id}`);
             const note = notesCache[id];
-
+            
             if (!note) {
                 console.error('未找到笔记缓存:', id);
                 return;
             }
-
+            
             const currentContent = contentDiv.innerHTML;
             const showFullText = currentContent.includes('显示全部');
-
+            
             // 判断是否为 Markdown 内容
             const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
                                note.clearText.includes('```') || note.clearText.includes('**') ||
                                note.clearText.includes('- ') || note.clearText.includes('> ');
-
+            
             if (showFullText) {
                 // 显示全部内容
                 const renderedContent = isMarkdown ? marked.parse(note.clearText) : 
                                         `<div class="whitespace-pre-wrap">${note.clearText.replace(/\n/g, '<br>')}</div>`;
                 contentDiv.innerHTML = renderedContent + 
                     `<button onclick="toggleNoteContent(${id})" class="text-blue-400 text-xs mt-2 hover:underline transition">收起</button>`;
-
+                
                 // 重新高亮代码块
                 setTimeout(() => {
                     hljs.highlightAll();
@@ -741,7 +991,7 @@ console.log('Hello');
                 if (note.clearText.length > 300) {
                     previewContent = note.clearText.substring(0, 300) + '...';
                 }
-
+                
                 const renderedContent = isMarkdown ? marked.parse(previewContent) : 
                                         `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
                 contentDiv.innerHTML = renderedContent + 
@@ -754,41 +1004,41 @@ console.log('Hello');
             currentEditId = id;
             document.getElementById('editNoteId').textContent = `#${id}`;
             document.getElementById('editNoteContent').value = content;
-
+            
             // 更新字符计数
             updateCharCount();
-
+            
             // 监听输入更新字符计数
             const textarea = document.getElementById('editNoteContent');
             textarea.addEventListener('input', updateCharCount);
-
+            
             // 切换到编辑标签
             switchTab('edit');
-
+            
             document.getElementById('editModal').classList.remove('hidden');
-
+            
             // 聚焦到文本区域
             setTimeout(() => {
                 textarea.focus();
             }, 100);
         }
-
+        
         function closeEdit() {
             document.getElementById('editModal').classList.add('hidden');
             currentEditId = null;
         }
-
+        
         async function saveEdit() {
             const newContent = document.getElementById('editNoteContent').value;
-
+            
             if (!newContent.trim()) {
                 alert("笔记内容不能为空");
                 return;
             }
-
+            
             // 直接调用 doSave 函数来保存编辑后的内容
             const success = await doSave(newContent, currentEditId);
-
+            
             if (success) {
                 closeEdit();
             }
@@ -872,7 +1122,8 @@ console.log('Hello');
                 .catch(err => console.error('Service Worker Registration Failed', err));
         }
 
-        init();
+        // 启动时检查会话
+        document.addEventListener('DOMContentLoaded', checkSession);
     </script>
 </body>
 
