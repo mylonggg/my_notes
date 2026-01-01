@@ -197,12 +197,39 @@
         .login-bg {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         }
+        
+        /* 加载动画 */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #3b82f6;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 分享页面样式 */
+        .share-gradient {
+            background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+        }
+        
+        .share-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.4);
+        }
     </style>
 </head>
 
 <body class="min-h-screen selection:bg-blue-500/30">
-    <!-- 密码验证弹窗 -->
-    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 login-bg">
+    <!-- 密码验证弹窗（只在普通访问时显示） -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 login-bg hidden">
         <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl space-y-8">
             <div class="text-center space-y-4">
                 <div class="inline-flex p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-5xl">🔐</div>
@@ -228,10 +255,15 @@
                     </p>
                 </div>
                 
-                <button onclick="checkPassword()" 
+                <button onclick="checkPassword()" id="verifyBtn"
                         class="w-full gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-sm shadow-xl hover:shadow-2xl transition-all">
                     验证身份
                 </button>
+                
+                <div id="loadingSpinner" class="hidden text-center py-4">
+                    <div class="loader mx-auto"></div>
+                    <p class="text-slate-400 mt-4 text-sm">验证中...</p>
+                </div>
                 
                 <div class="pt-6 border-t border-white/5 text-center">
                     <p class="text-xs text-slate-500">
@@ -347,193 +379,7 @@
     </div>
 
     <script>
-        // ==================== 密码验证配置 ====================
-        // 环境变量密码（生产环境建议通过构建时注入或通过API获取）
-        const ENV_PASSWORD = "CLOUDNOTES_ACCESS_2026"; // 默认密码，建议在生产环境修改
-        
-        // 会话存储密钥
-        const SESSION_KEY = 'cloudnotes_auth_token';
-        const ATTEMPTS_KEY = 'cloudnotes_auth_attempts';
-        
-        // 最大尝试次数
-        const MAX_ATTEMPTS = 5;
-        const LOCKOUT_TIME = 300000; // 5分钟（毫秒）
-        const LOCKOUT_KEY = 'cloudnotes_lockout_until';
-        
-        // 检查是否在锁定状态
-        function checkLockout() {
-            const lockoutUntil = localStorage.getItem(LOCKOUT_KEY);
-            if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
-                const remainingMinutes = Math.ceil((parseInt(lockoutUntil) - Date.now()) / 60000);
-                return {
-                    locked: true,
-                    remainingMinutes: remainingMinutes
-                };
-            }
-            return { locked: false };
-        }
-        
-        // 设置锁定状态
-        function setLockout() {
-            const lockoutUntil = Date.now() + LOCKOUT_TIME;
-            localStorage.setItem(LOCKOUT_KEY, lockoutUntil.toString());
-            
-            // 5分钟后自动清除锁定
-            setTimeout(() => {
-                localStorage.removeItem(LOCKOUT_KEY);
-                localStorage.removeItem(ATTEMPTS_KEY);
-                location.reload();
-            }, LOCKOUT_TIME);
-        }
-        
-        // 获取剩余尝试次数
-        function getRemainingAttempts() {
-            const attempts = localStorage.getItem(ATTEMPTS_KEY);
-            return attempts ? MAX_ATTEMPTS - parseInt(attempts) : MAX_ATTEMPTS;
-        }
-        
-        // 增加失败尝试
-        function incrementFailedAttempts() {
-            let attempts = localStorage.getItem(ATTEMPTS_KEY);
-            attempts = attempts ? parseInt(attempts) + 1 : 1;
-            localStorage.setItem(ATTEMPTS_KEY, attempts.toString());
-            
-            // 如果达到最大尝试次数，锁定
-            if (attempts >= MAX_ATTEMPTS) {
-                setLockout();
-            }
-            
-            return attempts;
-        }
-        
-        // 重置失败尝试
-        function resetFailedAttempts() {
-            localStorage.removeItem(ATTEMPTS_KEY);
-            localStorage.removeItem(LOCKOUT_KEY);
-        }
-        
-        // 验证密码
-        function checkPassword() {
-            const lockoutCheck = checkLockout();
-            if (lockoutCheck.locked) {
-                const input = document.getElementById('authPassword');
-                const attemptsCount = document.getElementById('attemptsCount');
-                attemptsCount.innerHTML = `账户已锁定，${lockoutCheck.remainingMinutes}分钟后重试`;
-                input.value = '';
-                input.classList.add('login-shake');
-                setTimeout(() => input.classList.remove('login-shake'), 500);
-                return;
-            }
-            
-            const input = document.getElementById('authPassword');
-            const password = input.value.trim();
-            const attemptsCount = document.getElementById('attemptsCount');
-            const remainingAttempts = getRemainingAttempts() - 1;
-            
-            if (!password) {
-                attemptsCount.innerHTML = '密码不能为空';
-                input.classList.add('login-shake');
-                setTimeout(() => {
-                    input.classList.remove('login-shake');
-                    attemptsCount.innerHTML = `剩余尝试次数: ${remainingAttempts + 1}`;
-                }, 500);
-                return;
-            }
-            
-            // 验证密码（生产环境中应该从服务器验证）
-            if (password === ENV_PASSWORD) {
-                // 创建会话令牌
-                const token = btoa(Date.now() + '-' + Math.random().toString(36).substr(2));
-                sessionStorage.setItem(SESSION_KEY, token);
-                
-                // 重置失败尝试
-                resetFailedAttempts();
-                
-                // 显示主应用界面
-                document.getElementById('authModal').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                
-                // 设置会话超时（8小时）
-                setTimeout(() => {
-                    if (confirm('会话已过期，是否重新登录？')) {
-                        logout();
-                    }
-                }, 8 * 60 * 60 * 1000);
-                
-                // 初始化应用
-                initApp();
-            } else {
-                // 密码错误
-                const attempts = incrementFailedAttempts();
-                const newRemaining = MAX_ATTEMPTS - attempts;
-                
-                if (attempts >= MAX_ATTEMPTS) {
-                    attemptsCount.innerHTML = '账户已锁定，5分钟后重试';
-                    setLockout();
-                } else {
-                    attemptsCount.innerHTML = `密码错误，剩余尝试次数: ${newRemaining}`;
-                }
-                
-                input.value = '';
-                input.classList.add('login-shake');
-                setTimeout(() => input.classList.remove('login-shake'), 500);
-                
-                // 清空输入框
-                input.value = '';
-            }
-        }
-        
-        // 登出
-        function logout() {
-            sessionStorage.removeItem(SESSION_KEY);
-            localStorage.removeItem(ATTEMPTS_KEY);
-            localStorage.removeItem(LOCKOUT_KEY);
-            location.reload();
-        }
-        
-        // 检查会话
-        function checkSession() {
-            const token = sessionStorage.getItem(SESSION_KEY);
-            if (token) {
-                try {
-                    // 简单的token验证（生产环境需要更复杂的验证）
-                    const parts = atob(token).split('-');
-                    if (parts.length === 2) {
-                        const timestamp = parseInt(parts[0]);
-                        const now = Date.now();
-                        // 检查token是否过期（24小时）
-                        if (now - timestamp < 24 * 60 * 60 * 1000) {
-                            document.getElementById('authModal').classList.add('hidden');
-                            document.getElementById('appContainer').classList.remove('hidden');
-                            return true;
-                        }
-                    }
-                } catch (e) {
-                    console.error('Token验证失败:', e);
-                }
-            }
-            
-            // 显示登录界面
-            document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('appContainer').classList.add('hidden');
-            
-            // 检查锁定状态
-            const lockoutCheck = checkLockout();
-            if (lockoutCheck.locked) {
-                const attemptsCount = document.getElementById('attemptsCount');
-                attemptsCount.innerHTML = `账户已锁定，${lockoutCheck.remainingMinutes}分钟后重试`;
-                document.getElementById('authPassword').disabled = true;
-            } else {
-                const remaining = getRemainingAttempts();
-                const attemptsCount = document.getElementById('attemptsCount');
-                attemptsCount.innerHTML = `剩余尝试次数: ${remaining}`;
-                document.getElementById('authPassword').disabled = false;
-            }
-            
-            return false;
-        }
-        
-        // ==================== 原有应用代码 ====================
+        // ==================== 系统配置 ====================
         const urlParams = new URLSearchParams(window.location.search);
         let apiFromUrl = urlParams.get('api');
         const cfgFromUrl = urlParams.get('cfg');
@@ -550,7 +396,17 @@
 
         const app = document.getElementById('app');
 
-        // 加解密逻辑
+        // ==================== 安全配置 ====================
+        // 会话存储密钥
+        const SESSION_KEY = 'cloudnotes_auth_token';
+        const ATTEMPTS_KEY = 'cloudnotes_auth_attempts';
+        
+        // 最大尝试次数
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 300000; // 5分钟（毫秒）
+        const LOCKOUT_KEY = 'cloudnotes_lockout_until';
+
+        // ==================== 加解密逻辑 ====================
         async function getK(pw) {
             const enc = new TextEncoder();
             const hash = await crypto.subtle.digest('SHA-256', enc.encode(pw));
@@ -588,10 +444,232 @@
             }
         });
 
+        // ==================== 安全验证函数 ====================
+        function checkLockout() {
+            const lockoutUntil = localStorage.getItem(LOCKOUT_KEY);
+            if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
+                const remainingMinutes = Math.ceil((parseInt(lockoutUntil) - Date.now()) / 60000);
+                return {
+                    locked: true,
+                    remainingMinutes: remainingMinutes
+                };
+            }
+            return { locked: false };
+        }
+        
+        function setLockout() {
+            const lockoutUntil = Date.now() + LOCKOUT_TIME;
+            localStorage.setItem(LOCKOUT_KEY, lockoutUntil.toString());
+            
+            setTimeout(() => {
+                localStorage.removeItem(LOCKOUT_KEY);
+                localStorage.removeItem(ATTEMPTS_KEY);
+                location.reload();
+            }, LOCKOUT_TIME);
+        }
+        
+        function getRemainingAttempts() {
+            const attempts = localStorage.getItem(ATTEMPTS_KEY);
+            return attempts ? MAX_ATTEMPTS - parseInt(attempts) : MAX_ATTEMPTS;
+        }
+        
+        function incrementFailedAttempts() {
+            let attempts = localStorage.getItem(ATTEMPTS_KEY);
+            attempts = attempts ? parseInt(attempts) + 1 : 1;
+            localStorage.setItem(ATTEMPTS_KEY, attempts.toString());
+            
+            if (attempts >= MAX_ATTEMPTS) {
+                setLockout();
+            }
+            
+            return attempts;
+        }
+        
+        function resetFailedAttempts() {
+            localStorage.removeItem(ATTEMPTS_KEY);
+            localStorage.removeItem(LOCKOUT_KEY);
+        }
+        
+        // ==================== 主验证函数 ====================
+        async function checkPassword() {
+            const lockoutCheck = checkLockout();
+            const input = document.getElementById('authPassword');
+            const attemptsCount = document.getElementById('attemptsCount');
+            const verifyBtn = document.getElementById('verifyBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            if (lockoutCheck.locked) {
+                attemptsCount.innerHTML = `账户已锁定，${lockoutCheck.remainingMinutes}分钟后重试`;
+                input.value = '';
+                input.classList.add('login-shake');
+                input.disabled = true;
+                verifyBtn.disabled = true;
+                setTimeout(() => input.classList.remove('login-shake'), 500);
+                return;
+            }
+            
+            const password = input.value.trim();
+            const remainingAttempts = getRemainingAttempts() - 1;
+            
+            if (!password) {
+                attemptsCount.innerHTML = '密码不能为空';
+                input.classList.add('login-shake');
+                setTimeout(() => {
+                    input.classList.remove('login-shake');
+                    attemptsCount.innerHTML = `剩余尝试次数: ${remainingAttempts + 1}`;
+                }, 500);
+                return;
+            }
+            
+            // 显示加载状态
+            verifyBtn.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            input.disabled = true;
+            
+            try {
+                // 调用后端验证API
+                const response = await fetch(`${API_URL}/api/verify-password`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 创建会话令牌
+                    const token = btoa(Date.now() + '-' + Math.random().toString(36).substr(2));
+                    sessionStorage.setItem(SESSION_KEY, token);
+                    
+                    // 重置失败尝试
+                    resetFailedAttempts();
+                    
+                    // 显示主应用界面
+                    document.getElementById('authModal').classList.add('hidden');
+                    document.getElementById('appContainer').classList.remove('hidden');
+                    
+                    // 初始化应用
+                    initApp();
+                } else {
+                    // 密码错误
+                    const attempts = incrementFailedAttempts();
+                    const newRemaining = MAX_ATTEMPTS - attempts;
+                    
+                    if (attempts >= MAX_ATTEMPTS) {
+                        attemptsCount.innerHTML = '账户已锁定，5分钟后重试';
+                        setLockout();
+                    } else {
+                        attemptsCount.innerHTML = `密码错误，剩余尝试次数: ${newRemaining}`;
+                    }
+                    
+                    input.value = '';
+                    input.classList.add('login-shake');
+                    setTimeout(() => input.classList.remove('login-shake'), 500);
+                }
+            } catch (error) {
+                console.error("验证失败:", error);
+                attemptsCount.innerHTML = '网络错误，请检查配置';
+                input.value = '';
+                input.classList.add('login-shake');
+                setTimeout(() => {
+                    input.classList.remove('login-shake');
+                    attemptsCount.innerHTML = `剩余尝试次数: ${remainingAttempts + 1}`;
+                }, 500);
+            } finally {
+                // 恢复按钮状态
+                verifyBtn.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                input.disabled = false;
+                input.focus();
+            }
+        }
+        
+        // 登出
+        function logout() {
+            sessionStorage.removeItem(SESSION_KEY);
+            localStorage.removeItem(ATTEMPTS_KEY);
+            localStorage.removeItem(LOCKOUT_KEY);
+            location.reload();
+        }
+        
+        // ==================== 应用初始化逻辑 ====================
         function initApp() {
-            if (shareId) renderShareView();
-            else if (!API_URL) renderWelcomeView();
-            else renderMainView();
+            if (shareId) {
+                // 分享模式：直接显示分享页面，不需要密码
+                renderShareView();
+            } else if (!API_URL) {
+                // 未配置API：显示配置页面
+                renderWelcomeView();
+            } else {
+                // 正常模式：显示主应用
+                renderMainView();
+            }
+        }
+        
+        // ==================== 检查会话（修改版） ====================
+        function checkSession() {
+            const token = sessionStorage.getItem(SESSION_KEY);
+            const apiUrl = localStorage.getItem('cf_notes_api');
+            
+            // 1. 如果是分享模式，直接显示分享页面
+            if (shareId) {
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                initApp();
+                return true;
+            }
+            
+            // 2. 如果没有配置API URL，直接进入配置界面（不需要密码）
+            if (!apiUrl) {
+                document.getElementById('authModal').classList.add('hidden');
+                document.getElementById('appContainer').classList.remove('hidden');
+                initApp();
+                return false;
+            }
+            
+            // 3. 正常访问：检查会话令牌
+            if (token) {
+                try {
+                    const parts = atob(token).split('-');
+                    if (parts.length === 2) {
+                        const timestamp = parseInt(parts[0]);
+                        const now = Date.now();
+                        // 检查token是否过期（8小时）
+                        if (now - timestamp < 8 * 60 * 60 * 1000) {
+                            document.getElementById('authModal').classList.add('hidden');
+                            document.getElementById('appContainer').classList.remove('hidden');
+                            initApp();
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Token验证失败:', e);
+                }
+            }
+            
+            // 4. 需要登录：显示登录界面
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('appContainer').classList.add('hidden');
+            
+            // 检查锁定状态
+            const lockoutCheck = checkLockout();
+            if (lockoutCheck.locked) {
+                const attemptsCount = document.getElementById('attemptsCount');
+                attemptsCount.innerHTML = `账户已锁定，${lockoutCheck.remainingMinutes}分钟后重试`;
+                document.getElementById('authPassword').disabled = true;
+                document.getElementById('verifyBtn').disabled = true;
+            } else {
+                const remaining = getRemainingAttempts();
+                const attemptsCount = document.getElementById('attemptsCount');
+                attemptsCount.innerHTML = `剩余尝试次数: ${remaining}`;
+                document.getElementById('authPassword').disabled = false;
+                document.getElementById('verifyBtn').disabled = false;
+            }
+            
+            return false;
         }
 
         function renderWelcomeView() {
@@ -687,22 +765,53 @@
 
         function renderShareView() {
             app.innerHTML = `
-            <div class="glass p-12 rounded-[3rem] shadow-2xl text-center space-y-8 animate-in zoom-in duration-500">
-                <div class="text-6xl animate-bounce">🔥</div>
-                <div class="space-y-2">
-                    <h1 class="text-3xl font-black italic">阅后即焚解密</h1>
-                    <p class="text-slate-400 text-sm">解密后数据将立即从服务器物理擦除</p>
-                </div>
-                <input id="sharePw" type="password" placeholder="请输入 6 位以上解密密码" class="w-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-orange-500/50 text-center font-mono">
-                <button id="unlockBtn" onclick="doUnlockShare()" class="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-[1.02] transition">解密并销毁</button>
-                <div id="shareResult" class="mt-8 text-left p-6 bg-slate-950/50 rounded-2xl hidden markdown-preview leading-relaxed border border-orange-500/20 ring-1 ring-orange-500/10 shadow-inner"></div>
-                <div class="pt-8 border-t border-white/5">
+            <div class="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <header class="flex justify-between items-end">
+                    <div class="space-y-1">
+                        <h1 class="text-4xl font-extrabold tracking-tighter bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">CloudNotes</h1>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-orange-500 font-black">阅后即焚 | 分享解密</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="window.location.href = window.location.origin + window.location.pathname" 
+                                class="text-xs text-slate-400 hover:text-white transition px-3 py-1 glass rounded-full" 
+                                title="返回主页">
+                            返回主页
+                        </button>
+                    </div>
+                </header>
+
+                <main class="glass p-12 rounded-[3rem] shadow-2xl text-center space-y-8">
+                    <div class="text-6xl animate-bounce">🔥</div>
+                    <div class="space-y-2">
+                        <h1 class="text-3xl font-black italic">阅后即焚解密</h1>
+                        <p class="text-slate-400 text-sm">解密后数据将立即从服务器物理擦除</p>
+                    </div>
+                    <input id="sharePw" type="password" placeholder="请输入 6 位以上解密密码" 
+                           class="w-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-orange-500/50 text-center font-mono">
+                    <button id="unlockBtn" onclick="doUnlockShare()" 
+                            class="w-full share-gradient text-white py-5 rounded-2xl font-black uppercase tracking-widest shadow-xl hover:scale-[1.02] transition">
+                        解密并销毁
+                    </button>
+                    <div id="shareResult" class="mt-8 text-left p-6 bg-slate-950/50 rounded-2xl hidden markdown-preview leading-relaxed border border-orange-500/20 ring-1 ring-orange-500/10 shadow-inner"></div>
+                </main>
+                
+                <footer class="text-center pt-8 pb-4 opacity-50 hover:opacity-100 transition duration-500">
                     <span class="text-3xl font-black uppercase tracking-widest text-red-500">
                         蒼天已死，黃天當立
                     </span>
-                </div>
+                </footer>
             </div>
         `;
+            
+            // 添加回车键支持
+            const sharePwInput = document.getElementById('sharePw');
+            if (sharePwInput) {
+                sharePwInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        doUnlockShare();
+                    }
+                });
+            }
         }
 
         /* --- 功能逻辑 --- */
@@ -999,7 +1108,7 @@ console.log('Hello');
             }
         }
 
-        // ==================== 新增编辑功能 ====================
+        // ==================== 编辑功能 ====================
         function openEdit(id, content) {
             currentEditId = id;
             document.getElementById('editNoteId').textContent = `#${id}`;
@@ -1099,23 +1208,48 @@ console.log('Hello');
         async function doUnlockShare() {
             const pw = document.getElementById('sharePw').value; 
             const resDiv = document.getElementById('shareResult');
+            const unlockBtn = document.getElementById('unlockBtn');
+            
+            if (!pw) {
+                alert("请输入解密密码");
+                return;
+            }
+            
             try {
+                unlockBtn.innerText = "解密中...";
+                unlockBtn.disabled = true;
+                
                 const res = await fetch(`${API_URL}/api/share/${shareId}`);
-                if (!res.ok) return alert("失效或已被焚毁");
+                if (!res.ok) {
+                    alert("链接已失效或内容已被焚毁");
+                    return;
+                }
+                
                 const data = await res.json(); 
                 const clearText = await decrypt(data.content, pw);
+                
                 if (clearText) { 
                     // 渲染 Markdown
                     resDiv.innerHTML = marked.parse(clearText);
                     hljs.highlightAll();
                     resDiv.classList.remove('hidden'); 
-                    document.getElementById('unlockBtn').disabled = true; 
-                    document.getElementById('unlockBtn').innerText = "数据已销毁";
+                    unlockBtn.innerText = "数据已销毁";
+                    unlockBtn.classList.remove('share-gradient');
+                    unlockBtn.classList.add('bg-gray-600', 'cursor-not-allowed');
+                } else {
+                    alert("密码错误");
+                    unlockBtn.innerText = "解密并销毁";
+                    unlockBtn.disabled = false;
                 }
-                else alert("密码错误");
-            } catch (e) { alert("网络异常"); }
+            } catch (e) { 
+                console.error("解密失败:", e);
+                alert("网络异常或解密失败");
+                unlockBtn.innerText = "解密并销毁";
+                unlockBtn.disabled = false;
+            }
         }
 
+        // ==================== 初始化 ====================
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then(() => console.log('Service Worker Registered'))
