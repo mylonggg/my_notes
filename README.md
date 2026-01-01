@@ -13,12 +13,11 @@
 6.绑定AI,变量名`AI`
 
 7.绑定自定域，然后添加一个环境变量（密码用于绑定数据库）类型：密钥，变量名`ADMIN_KEY`,值设置成你想要的密码
+8.再加一个变量`ACCESS_PASSWORD`，作为前端密码
 ## 创建前端
 
-1.在github里[index.html](https://github.com/mylonggg/my_notes/blob/main/index.html)中 `const ENV_PASSWORD = "CLOUDNOTES_ACCESS_2026"`把`CLOUDNOTES_ACCESS_2026`改成自己密码;
 
-2.新建Pages 连接github账号，选项目名称，然后绑定自定域
 
-3.输入前端`const ENV_PASSWORD`密码进入初始设置
+1.新建Pages 连接github账号，选项目名称，，直接部署，然后绑定自定域
 
-3.初化设置，绑定前端的自定域，密码为：`ADMIN_KEY`的密码
+2.初化设置，绑定后端的自定域，密码为：`ADMIN_KEY`的密码
