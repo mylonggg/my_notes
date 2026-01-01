@@ -11,6 +11,42 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
+      // ============ 密码验证接口（不需要 ADMIN_KEY 验证）============
+      if (url.pathname === "/api/verify-password" && request.method === "POST") {
+        try {
+          const { password } = await request.json();
+          
+          // 从环境变量获取密码（确保在 Cloudflare Worker 设置中添加 ACCESS_PASSWORD）
+          // 如果没有设置环境变量，使用一个默认的密码（仅用于开发）
+          const expectedPassword = env.ACCESS_PASSWORD || "DEFAULT_ACCESS_PASSWORD_2026";
+          
+          if (password === expectedPassword) {
+            return Response.json({ 
+              success: true,
+              message: "验证成功"
+            }, { headers: corsHeaders });
+          } else {
+            return Response.json({ 
+              success: false,
+              message: "密码错误"
+            }, { 
+              status: 401,
+              headers: corsHeaders 
+            });
+          }
+        } catch (error) {
+          return new Response(JSON.stringify({ 
+            success: false, 
+            message: "请求格式错误",
+            error: error.message 
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+      }
+
+      // ============ 分享接口（不需要 ADMIN_KEY 验证）============
       if (url.pathname.startsWith("/api/share/")) {
         const pid = url.pathname.split("/").pop();
         const res = await env.DB.prepare("SELECT content FROM notes WHERE public_id = ? AND is_share_copy = 1").bind(pid).first();
@@ -21,6 +57,18 @@ export default {
         return new Response(JSON.stringify({ error: "失效或已被焚毁" }), { status: 404, headers: corsHeaders });
       }
 
+      // ============ 健康检查接口（不需要 ADMIN_KEY 验证）============
+      if (url.pathname === "/api/health" && request.method === "GET") {
+        // 健康检查端点
+        return Response.json({ 
+          status: "healthy",
+          service: "CloudNotes API",
+          timestamp: new Date().toISOString(),
+          version: "1.0.0"
+        }, { headers: corsHeaders });
+      }
+
+      // ============ 以下接口需要 ADMIN_KEY 验证 ============
       const auth = request.headers.get("Authorization");
       if (auth !== env.ADMIN_KEY) {
         return new Response(JSON.stringify({ error: "暗号错误" }), { status: 401, headers: corsHeaders });
@@ -126,16 +174,6 @@ export default {
           console.log("system_config表不存在，返回空配置");
           return Response.json({}, { headers: corsHeaders });
         }
-      }
-
-      if (url.pathname === "/api/health" && request.method === "GET") {
-        // 健康检查端点
-        return Response.json({ 
-          status: "healthy",
-          service: "CloudNotes API",
-          timestamp: new Date().toISOString(),
-          version: "1.0.0"
-        }, { headers: corsHeaders });
       }
 
       return new Response(JSON.stringify({ error: "Not Found" }), { 
