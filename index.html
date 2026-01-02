@@ -47,12 +47,10 @@
             background: rgba(30, 41, 59, 0.9);
         }
 
-        /* 隐藏滚动条但保留功能 */
         ::-webkit-scrollbar {
             width: 0px;
         }
 
-        /* Markdown 预览样式 */
         .markdown-preview {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
@@ -158,7 +156,6 @@
             margin: 2em 0;
         }
 
-        /* Tab 切换样式 */
         .tab-button {
             padding: 0.75em 1.5em;
             background: transparent;
@@ -179,12 +176,10 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        /* 代码高亮 */
         .hljs {
             background: transparent !important;
         }
         
-        /* 登录界面样式 */
         .login-shake {
             animation: shake 0.5s ease-in-out;
         }
@@ -199,7 +194,6 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         }
         
-        /* 加载动画 */
         .loader {
             width: 48px;
             height: 48px;
@@ -216,7 +210,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* 分享页面样式 */
         .share-gradient {
             background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
         }
@@ -226,7 +219,6 @@
             box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.4);
         }
         
-        /* 导航页面样式 */
         .nav-gradient {
             background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         }
@@ -236,7 +228,6 @@
             box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.4);
         }
         
-        /* 导航链接卡片样式 */
         .nav-link-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -249,7 +240,6 @@
             background: rgba(30, 41, 59, 0.9);
         }
         
-        /* 分类标签样式 */
         .category-tag {
             display: inline-block;
             padding: 0.25em 0.75em;
@@ -260,7 +250,6 @@
             letter-spacing: 0.05em;
         }
         
-        /* 图标颜色 */
         .icon-blue { color: #60a5fa; }
         .icon-green { color: #34d399; }
         .icon-purple { color: #a78bfa; }
@@ -269,7 +258,6 @@
         .icon-pink { color: #f472b6; }
         .icon-indigo { color: #818cf8; }
         
-        /* 快速访问栏 */
         .quick-access-bar {
             position: fixed;
             bottom: 20px;
@@ -296,7 +284,6 @@
             transform: scale(1.1) rotate(5deg);
         }
         
-        /* 模态框动画 */
         .modal-enter {
             animation: modalEnter 0.3s ease-out;
         }
@@ -312,14 +299,12 @@
             }
         }
         
-        /* 导航网格布局 */
         .nav-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 1.5rem;
         }
         
-        /* 响应式调整 */
         @media (max-width: 768px) {
             .nav-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -341,7 +326,6 @@
 </head>
 
 <body class="min-h-screen selection:bg-blue-500/30">
-    <!-- 密码验证弹窗（只在普通访问时显示） -->
     <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 login-bg hidden">
         <div class="glass w-full max-w-md p-10 rounded-[2.5rem] shadow-2xl space-y-8">
             <div class="text-center space-y-4">
@@ -387,14 +371,11 @@
         </div>
     </div>
 
-    <!-- 主应用界面 -->
     <div id="appContainer" class="hidden">
         <div id="app" class="max-w-6xl mx-auto px-4 py-8 md:py-12">
-            <!-- 动态加载区 -->
         </div>
     </div>
 
-    <!-- 快速访问栏 -->
     <div id="quickAccessBar" class="quick-access-bar hidden">
         <button onclick="showAddNavLinkModal()" class="quick-access-btn nav-gradient text-white" title="添加导航链接">
             <i class="fas fa-plus"></i>
@@ -407,7 +388,6 @@
         </button>
     </div>
 
-    <!-- 极简设置弹窗 -->
     <div id="settingsModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
@@ -434,9 +414,6 @@
         </div>
     </div>
 
-    
-    <!-- 编辑弹窗 -->
-    <!-- 编辑弹窗 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col modal-enter">
@@ -452,7 +429,6 @@
             
             <div class="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
                 <div id="editTab" class="flex-1 flex flex-col min-h-0">
-                    <!-- Markdown语法工具栏 -->
                     <div class="flex gap-2 flex-wrap mb-3">
                         <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="一级标题">H1</button>
                         <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="二级标题">H2</button>
@@ -462,14 +438,11 @@
                         <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="代码块">代码</button>
                     </div>
                     
-                    <!-- 编辑框容器 -->
                     <div class="flex-1 min-h-0 border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50 relative">
-                        <!-- 编辑区域 -->
                         <textarea id="editNoteContent" 
                             class="w-full h-full bg-transparent p-5 outline-none text-sm transition-all resize-none leading-relaxed font-mono min-h-[45vh] border-0"
                             placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
                         
-                        <!-- 右下角字数统计 -->
                         <div class="absolute bottom-3 right-4">
                             <div class="text-xs text-slate-500 bg-slate-900/70 px-2 py-1 rounded">
                                 <span id="editCharCount">0</span> 字符
@@ -483,7 +456,6 @@
                         Markdown 预览
                     </div>
                     <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[60vh]">
-                        <!-- Markdown 预览内容 -->
                     </div>
                 </div>
             </div>
@@ -508,7 +480,6 @@
         </div>
     </div>
 
-    <!-- 添加笔记弹窗 -->
     <div id="addNoteModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="glass w-full max-w-2xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
@@ -550,7 +521,6 @@
         </div>
     </div>
 
-    <!-- 添加导航链接弹窗 -->
     <div id="addNavLinkModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
@@ -628,7 +598,6 @@
         </div>
     </div>
 
-    <!-- 编辑导航链接弹窗 -->
     <div id="editNavLinkModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
         <div class="glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
@@ -682,7 +651,6 @@
                         <button onclick="setEditNavIcon('fas fa-film', 'icon-pink')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-film icon-pink"></i></button>
                     </div>
                     <div id="editNavIconPreview" class="text-center py-2">
-                        <!-- 图标预览 -->
                     </div>
                     <input id="editNavLinkIcon" type="hidden">
                     <input id="editNavLinkIconColor" type="hidden">
@@ -727,16 +695,11 @@
         let API_URL = apiFromUrl || localStorage.getItem('cf_notes_api') || "";
         let ADMIN_KEY = localStorage.getItem('cf_notes_key') || "";
 
-        // 当前编辑的笔记ID
         let currentEditId = null;
-        // 当前编辑的导航链接ID
         let currentEditNavLinkId = null;
         
-        // 全局缓存笔记数据
         let notesCache = {};
-        // 全局缓存导航数据
         let navLinksCache = {};
-        // 当前活动视图：'notes' 或 'nav'
         let currentView = 'notes';
 
         const app = document.getElementById('app');
@@ -1102,7 +1065,6 @@
                         <div class="flex justify-between items-center px-4">
                             <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 italic">Navigation / 我的链接库</h2>
                             <div class="text-xs text-slate-500" id="navStats">
-                                <!-- 统计信息 -->
                             </div>
                         </div>
                         
@@ -1131,9 +1093,7 @@
             
             // 加载默认视图数据
             if (currentView === 'notes') {
-                // 笔记视图不需要自动加载，需要密码
             } else {
-                // 导航视图自动加载
                 loadNavLinks();
             }
             
@@ -1199,7 +1159,6 @@
         }
 
         // ==================== 导航功能 ====================
-        // 加载导航链接
         async function loadNavLinks() {
             try {
                 const response = await fetch(`${API_URL}/api/nav/list`, {
@@ -1212,13 +1171,11 @@
                 
                 const navLinks = await response.json();
                 
-                // 缓存导航链接
                 navLinksCache = {};
                 navLinks.forEach(link => {
                     navLinksCache[link.id] = link;
                 });
                 
-                // 按分类分组
                 const categories = {};
                 navLinks.forEach(link => {
                     const category = link.category || '未分类';
@@ -1228,7 +1185,6 @@
                     categories[category].push(link);
                 });
                 
-                // 渲染分类
                 const navCategoriesDiv = document.getElementById('navCategories');
                 if (navLinks.length === 0) {
                     navCategoriesDiv.innerHTML = `
@@ -1292,7 +1248,6 @@
                 
                 navCategoriesDiv.innerHTML = html;
                 
-                // 更新统计信息
                 document.getElementById('navStats').textContent = `${navLinks.length} 个链接，${categoryNames.length} 个分类`;
                 
             } catch (error) {
@@ -1306,15 +1261,12 @@
             }
         }
         
-        // 打开链接（新标签页）
         function openLinkInNewTab(url) {
             window.open(url, '_blank');
         }
         
-        // 显示添加导航链接弹窗
         function showAddNavLinkModal() {
             document.getElementById('addNavLinkModal').classList.remove('hidden');
-            // 重置表单
             document.getElementById('navLinkTitle').value = '';
             document.getElementById('navLinkUrl').value = '';
             document.getElementById('navLinkCategory').value = '日常效率';
@@ -1323,23 +1275,19 @@
             document.getElementById('navLinkDescription').value = '';
         }
         
-        // 关闭添加导航链接弹窗
         function closeAddNavLinkModal() {
             document.getElementById('addNavLinkModal').classList.add('hidden');
         }
         
-        // 设置导航分类
         function setNavCategory(category) {
             document.getElementById('navLinkCategory').value = category;
         }
         
-        // 设置导航图标
         function setNavIcon(icon, color) {
             document.getElementById('navLinkIcon').value = icon;
             document.getElementById('navLinkIconColor').value = color;
         }
         
-        // 保存导航链接
         async function saveNavLink() {
             const title = document.getElementById('navLinkTitle').value.trim();
             const url = document.getElementById('navLinkUrl').value.trim();
@@ -1388,7 +1336,6 @@
             }
         }
         
-        // 编辑导航链接
         async function editNavLink(id) {
             const link = navLinksCache[id];
             if (!link) {
@@ -1405,19 +1352,16 @@
             document.getElementById('editNavLinkIconColor').value = link.icon_color || 'icon-blue';
             document.getElementById('editNavLinkDescription').value = link.description || '';
             
-            // 显示图标预览
             const iconPreview = document.getElementById('editNavIconPreview');
             iconPreview.innerHTML = `<i class="${link.icon || 'fas fa-globe'} ${link.icon_color || 'icon-blue'} text-2xl"></i>`;
             
             document.getElementById('editNavLinkModal').classList.remove('hidden');
         }
         
-        // 设置编辑导航分类
         function setEditNavCategory(category) {
             document.getElementById('editNavLinkCategory').value = category;
         }
         
-        // 设置编辑导航图标
         function setEditNavIcon(icon, color) {
             document.getElementById('editNavLinkIcon').value = icon;
             document.getElementById('editNavLinkIconColor').value = color;
@@ -1425,13 +1369,11 @@
             iconPreview.innerHTML = `<i class="${icon} ${color} text-2xl"></i>`;
         }
         
-        // 关闭编辑导航链接弹窗
         function closeEditNavLinkModal() {
             document.getElementById('editNavLinkModal').classList.add('hidden');
             currentEditNavLinkId = null;
         }
         
-        // 更新导航链接
         async function updateNavLink() {
             const title = document.getElementById('editNavLinkTitle').value.trim();
             const url = document.getElementById('editNavLinkUrl').value.trim();
@@ -1481,14 +1423,12 @@
             }
         }
         
-        // 确认删除导航链接
         function confirmDeleteNavLink() {
             if (confirm("确定要删除这个导航链接吗？此操作不可撤销。")) {
                 deleteNavLink(currentEditNavLinkId);
             }
         }
         
-        // 删除导航链接
         async function deleteNavLink(id) {
             try {
                 const response = await fetch(`${API_URL}/api/nav/delete`, {
@@ -1513,7 +1453,6 @@
             }
         }
         
-        // 导出导航链接
         async function exportNavLinks() {
             try {
                 const response = await fetch(`${API_URL}/api/nav/list`, {
@@ -1526,7 +1465,6 @@
                 
                 const navLinks = await response.json();
                 
-                // 格式化为JSON
                 const exportData = {
                     export_date: new Date().toISOString(),
                     total_links: navLinks.length,
@@ -1534,7 +1472,6 @@
                     links: navLinks
                 };
                 
-                // 按分类分组
                 navLinks.forEach(link => {
                     const category = link.category || '未分类';
                     if (!exportData.categories[category]) {
@@ -1543,7 +1480,6 @@
                     exportData.categories[category].push(link.title);
                 });
                 
-                // 创建下载
                 const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1559,15 +1495,12 @@
         }
 
         // ==================== 笔记功能 ====================
-        // 显示添加笔记弹窗
         function showAddNoteModal() {
             document.getElementById('addNoteModal').classList.remove('hidden');
-            // 重置表单
             document.getElementById('quickMainPw').value = '';
             document.getElementById('quickNoteInput').value = '';
             document.getElementById('quickNoteCharCount').textContent = '0';
             
-            // 添加字符计数监听
             const quickNoteInput = document.getElementById('quickNoteInput');
             const quickNoteCharCount = document.getElementById('quickNoteCharCount');
             quickNoteInput.addEventListener('input', function() {
@@ -1575,12 +1508,10 @@
             });
         }
         
-        // 关闭添加笔记弹窗
         function closeAddNoteModal() {
             document.getElementById('addNoteModal').classList.add('hidden');
         }
         
-        // 快速保存笔记
         async function quickSaveNote() {
             const text = document.getElementById('quickNoteInput').value;
             const pw = document.getElementById('quickMainPw').value;
@@ -1616,7 +1547,87 @@
             }
         }
         
-        // 加载笔记列表
+        // ==================== 方案三的核心改进部分 ====================
+        
+        // Base64 编码辅助函数（支持中文）
+        function base64Encode(str) {
+            try {
+                return btoa(unescape(encodeURIComponent(str)));
+            } catch (e) {
+                console.error('Base64编码失败:', e);
+                return '';
+            }
+        }
+        
+        // Base64 解码辅助函数
+        function base64Decode(str) {
+            try {
+                return decodeURIComponent(escape(atob(str)));
+            } catch (e) {
+                console.error('Base64解码失败:', e);
+                return '';
+            }
+        }
+        
+        // 从 data 属性导出的函数
+        function exportFromData(button) {
+            const id = button.getAttribute('data-note-id');
+            const base64Content = button.getAttribute('data-note-content-base64');
+            
+            if (!base64Content) {
+                // 回退到从缓存获取
+                const note = notesCache[id];
+                if (note && note.clearText) {
+                    doExport(note.clearText, parseInt(id));
+                } else {
+                    alert('无法获取笔记内容');
+                }
+                return;
+            }
+            
+            try {
+                const text = base64Decode(base64Content);
+                if (text) {
+                    doExport(text, parseInt(id));
+                } else {
+                    throw new Error('解码失败');
+                }
+            } catch (e) {
+                console.error('导出失败:', e);
+                alert('导出失败，请重试');
+            }
+        }
+        
+        // 从 data 属性编辑的函数
+        function editFromData(button) {
+            const id = button.getAttribute('data-note-id');
+            const base64Content = button.getAttribute('data-note-content-base64');
+            
+            if (!base64Content) {
+                // 回退到从缓存获取
+                const note = notesCache[id];
+                if (note && note.clearText) {
+                    openEdit(parseInt(id), note.clearText);
+                } else {
+                    alert('无法获取笔记内容');
+                }
+                return;
+            }
+            
+            try {
+                const text = base64Decode(base64Content);
+                if (text) {
+                    openEdit(parseInt(id), text);
+                } else {
+                    throw new Error('解码失败');
+                }
+            } catch (e) {
+                console.error('编辑失败:', e);
+                alert('编辑失败，请重试');
+            }
+        }
+        
+        // 修改后的加载笔记列表函数
         async function loadNotesList() {
             const pw = document.getElementById('mainPw').value; 
             if (!pw) return alert("请输入密码解密");
@@ -1665,6 +1676,9 @@
                     const renderedContent = isMarkdown ? marked.parse(previewContent) : 
                                             `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
                     
+                    // 使用 Base64 编码内容存储在 data 属性中
+                    const base64Content = base64Encode(clearText);
+                    
                     card.innerHTML = `
                     <div class="flex justify-between text-[9px] font-black text-slate-500 tracking-widest uppercase italic">
                         <span>索引编号 #${n.id}</span>
@@ -1676,8 +1690,8 @@
                     </div>
                     <div class="pt-4 border-t border-white/5 flex flex-wrap gap-4 items-center">
                         <button onclick="doShareCopy('${n.content.replace(/'/g, "\\'")}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成分享链接</button>
-                        <button onclick="doExport(\`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${n.id})" class="text-xs font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition">💾 导出备份</button>
-                        <button onclick="openEdit(${n.id}, \`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" class="text-xs font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition">✏️ 编辑</button>
+                        <button data-note-id="${n.id}" data-note-content-base64="${base64Content}" onclick="exportFromData(this)" class="text-xs font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition">💾 导出备份</button>
+                        <button data-note-id="${n.id}" data-note-content-base64="${base64Content}" onclick="editFromData(this)" class="text-xs font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition">✏️ 编辑</button>
                         <button onclick="doDelete(${n.id})" class="text-xs font-black text-rose-500 uppercase tracking-widest ml-auto opacity-40 group-hover:opacity-100 transition">🗑️ 删除</button>
                     </div>
                 `;
@@ -1692,7 +1706,6 @@
         }
 
         // ==================== 通用功能 ====================
-        /* --- 功能逻辑 --- */
         function configUrl() {
             document.getElementById('settingsModal').classList.remove('hidden');
             document.getElementById('setApi').value = API_URL;
@@ -1709,7 +1722,6 @@
             location.reload();
         }
 
-        // Markdown 辅助函数
         function showMarkdownHelp() {
             const helpContent = `# Markdown 语法速查
 
@@ -1857,7 +1869,6 @@ console.log('Hello');
             }
         }
 
-        // 修复的 toggleNoteContent 函数
         function toggleNoteContent(id) {
             const contentDiv = document.getElementById(`noteContent-${id}`);
             const note = notesCache[id];
@@ -2046,79 +2057,4 @@ console.log('Hello');
         document.addEventListener('DOMContentLoaded', checkSession);
     </script>
 </body>
-
-</html><!-- 编辑弹窗 -->
-<div id="editModal"
-    class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-    <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col modal-enter">
-        <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-            <span class="text-blue-400">✏️</span> 编辑笔记
-            <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
-        </h2>
-        
-        <div class="flex gap-2 mb-4">
-            <button onclick="switchTab('edit')" class="tab-button active" id="editTabBtn">编辑模式</button>
-            <button onclick="switchTab('preview')" class="tab-button" id="previewTabBtn">预览模式</button>
-        </div>
-        
-        <div class="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
-            <div id="editTab" class="flex-1 flex flex-col min-h-0">
-                <!-- 工具栏 -->
-                <div class="flex gap-2 flex-wrap mb-3">
-                    <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="一级标题">H1</button>
-                    <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="二级标题">H2</button>
-                    <button onclick="insertMarkdown('**', '粗体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="粗体">粗体</button>
-                    <button onclick="insertMarkdown('*', '斜体文本')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="斜体">斜体</button>
-                    <button onclick="insertMarkdown('- ', '列表项')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="无序列表">列表</button>
-                    <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="代码块">代码</button>
-                </div>
-                
-                <!-- 编辑框容器 -->
-                <div class="flex-1 min-h-0 border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50">
-                    <!-- 编辑区域 -->
-                    <textarea id="editNoteContent" 
-                        class="w-full h-full bg-transparent p-5 outline-none text-sm transition-all resize-none leading-relaxed font-mono min-h-[45vh] border-0"
-                        placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
-                    
-                    <!-- 底部工具栏 -->
-                    <div class="flex items-center justify-between px-4 py-3 border-t border-slate-800 bg-slate-900/30">
-                        <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition flex items-center gap-1">
-                            <i class="fas fa-question-circle"></i>
-                            Markdown 语法帮助
-                        </button>
-                        <div class="text-xs text-slate-500 flex items-center gap-2">
-                            <span id="editCharCount">0</span> 字符
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="previewTab" class="flex-1 overflow-y-auto hidden min-h-0">
-                <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
-                    Markdown 预览
-                </div>
-                <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[60vh]">
-                    <!-- Markdown 预览内容 -->
-                </div>
-            </div>
-        </div>
-        
-        <div class="flex gap-3 pt-6 border-t border-white/5">
-            <button onclick="closeEdit()"
-                class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
-                取消
-            </button>
-            <button onclick="saveEdit()"
-                class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
-                保存更改
-            </button>
-        </div>
-        
-        <div class="pt-4 border-t border-white/5 text-xs text-slate-500">
-            <p class="flex items-center gap-2">
-                <span class="text-yellow-400">⚠️</span>
-                注意：编辑后笔记将使用当前主密码重新加密保存到云端
-            </p>
-        </div>
-    </div>
-</div>
+</html>
