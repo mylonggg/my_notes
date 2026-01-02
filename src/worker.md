@@ -11,13 +11,11 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
     try {
-      // ============ 密码验证接口（不需要 ADMIN_KEY 验证）============
+      // ============ 密码验证接口 ============
       if (url.pathname === "/api/verify-password" && request.method === "POST") {
         try {
           const { password } = await request.json();
           
-          // 从环境变量获取密码（确保在 Cloudflare Worker 设置中添加 ACCESS_PASSWORD）
-          // 如果没有设置环境变量，使用一个默认的密码（仅用于开发）
           const expectedPassword = env.ACCESS_PASSWORD || "DEFAULT_ACCESS_PASSWORD_2026";
           
           if (password === expectedPassword) {
@@ -46,7 +44,7 @@ export default {
         }
       }
 
-      // ============ 分享接口（不需要 ADMIN_KEY 验证）============
+      // ============ 分享接口 ============
       if (url.pathname.startsWith("/api/share/")) {
         const pid = url.pathname.split("/").pop();
         const res = await env.DB.prepare("SELECT content FROM notes WHERE public_id = ? AND is_share_copy = 1").bind(pid).first();
@@ -57,9 +55,8 @@ export default {
         return new Response(JSON.stringify({ error: "失效或已被焚毁" }), { status: 404, headers: corsHeaders });
       }
 
-      // ============ 健康检查接口（不需要 ADMIN_KEY 验证）============
+      // ============ 健康检查接口 ============
       if (url.pathname === "/api/health" && request.method === "GET") {
-        // 健康检查端点
         return Response.json({ 
           status: "healthy",
           service: "CloudNotes API",
@@ -74,16 +71,15 @@ export default {
         return new Response(JSON.stringify({ error: "暗号错误" }), { status: 401, headers: corsHeaders });
       }
 
+      // ============ 笔记相关API ============
       if (url.pathname === "/api/save" && request.method === "POST") {
         const { content, public_id, is_share, id } = await request.json();
         
         if (id) {
-          // 更新现有笔记（编辑功能）- 移除updated_at字段
           await env.DB.prepare(
             "UPDATE notes SET content = ? WHERE id = ?"
           ).bind(content, id).run();
         } else {
-          // 新建笔记
           await env.DB.prepare(
             "INSERT INTO notes (content, public_id, is_share_copy) VALUES (?, ?, ?)"
           ).bind(content, public_id || null, is_share ? 1 : 0).run();
@@ -114,11 +110,96 @@ export default {
         return Response.json({ summary: aiRes.response }, { headers: corsHeaders });
       }
 
-      // ============ 新增配置管理API（简化版）============
+      // ============ 导航相关API ============
+      // 获取导航链接列表
+      if (url.pathname === "/api/nav/list" && request.method === "GET") {
+        try {
+          // 检查nav_links表是否存在
+          const { results } = await env.DB.prepare(
+            "SELECT * FROM nav_links ORDER BY category, created_at DESC"
+          ).all();
+          
+          return Response.json(results, { headers: corsHeaders });
+        } catch (error) {
+          // 如果表不存在，返回空数组
+          if (error.message.includes("no such table")) {
+            return Response.json([], { headers: corsHeaders });
+          }
+          throw error;
+        }
+      }
+
+      // 保存/更新导航链接
+      if (url.pathname === "/api/nav/save" && request.method === "POST") {
+        try {
+          const { id, title, url, category, icon, icon_color, description } = await request.json();
+          
+          if (!title || !url) {
+            return new Response(JSON.stringify({ error: "标题和URL不能为空" }), { 
+              status: 400, 
+              headers: { ...corsHeaders, "Content-Type": "application/json" } 
+            });
+          }
+          
+          if (id) {
+            // 更新现有链接
+            await env.DB.prepare(
+              `UPDATE nav_links 
+               SET title = ?, url = ?, category = ?, icon = ?, icon_color = ?, description = ?, updated_at = datetime('now')
+               WHERE id = ?`
+            ).bind(title, url, category || "未分类", icon || "fas fa-globe", icon_color || "icon-blue", description || "", id).run();
+          } else {
+            // 新建链接
+            await env.DB.prepare(
+              `INSERT INTO nav_links (title, url, category, icon, icon_color, description, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`
+            ).bind(title, url, category || "未分类", icon || "fas fa-globe", icon_color || "icon-blue", description || "").run();
+          }
+          
+          return new Response("OK", { headers: corsHeaders });
+        } catch (error) {
+          console.error("保存导航链接失败:", error);
+          return new Response(JSON.stringify({ 
+            error: "保存失败",
+            details: error.message 
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+      }
+
+      // 删除导航链接
+      if (url.pathname === "/api/nav/delete" && request.method === "POST") {
+        try {
+          const { id } = await request.json();
+          
+          if (!id) {
+            return new Response(JSON.stringify({ error: "ID不能为空" }), { 
+              status: 400, 
+              headers: { ...corsHeaders, "Content-Type": "application/json" } 
+            });
+          }
+          
+          await env.DB.prepare("DELETE FROM nav_links WHERE id = ?").bind(id).run();
+          
+          return new Response("Deleted", { headers: corsHeaders });
+        } catch (error) {
+          console.error("删除导航链接失败:", error);
+          return new Response(JSON.stringify({ 
+            error: "删除失败",
+            details: error.message 
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" }
+          });
+        }
+      }
+
+      // ============ 配置管理API ============
       if (url.pathname === "/api/config/save" && request.method === "POST") {
         const { apiUrl, password, timestamp } = await request.json();
         
-        // 验证输入
         if (!apiUrl || !password) {
           return new Response(JSON.stringify({ error: "缺少必要参数" }), { 
             status: 400, 
@@ -127,8 +208,6 @@ export default {
         }
         
         try {
-          // 创建或更新配置记录 - 使用简单的方式保存密码
-          // 注意：这里只是示例，实际生产环境需要更安全的方式
           await env.DB.prepare(
             "INSERT OR REPLACE INTO system_config (config_key, config_value) VALUES (?, ?)"
           )
@@ -143,7 +222,6 @@ export default {
             headers: { ...corsHeaders, "Content-Type": "application/json" } 
           });
         } catch (dbError) {
-          // 如果system_config表不存在，我们返回成功（模拟保存）
           console.log("system_config表可能不存在，模拟保存成功");
           return new Response(JSON.stringify({ 
             success: true, 
@@ -157,12 +235,10 @@ export default {
 
       if (url.pathname === "/api/config/get" && request.method === "GET") {
         try {
-          // 获取所有配置项
           const { results } = await env.DB.prepare(
             "SELECT config_key, config_value FROM system_config"
           ).all();
           
-          // 转换为对象形式
           const config = {};
           results.forEach(row => {
             config[row.config_key] = row.config_value;
@@ -170,7 +246,6 @@ export default {
           
           return Response.json(config, { headers: corsHeaders });
         } catch (error) {
-          // 如果表不存在，返回空配置
           console.log("system_config表不存在，返回空配置");
           return Response.json({}, { headers: corsHeaders });
         }
