@@ -434,7 +434,7 @@
         </div>
     </div>
 
-    <!-- 编辑弹窗 -->
+    
     <!-- 编辑弹窗 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
@@ -451,7 +451,7 @@
             
             <div class="space-y-4 flex-1 overflow-hidden flex flex-col min-h-0">
                 <div id="editTab" class="flex-1 flex flex-col min-h-0">
-                    <!-- 工具栏 -->
+                    <!-- Markdown语法工具栏 -->
                     <div class="flex gap-2 flex-wrap mb-3">
                         <button onclick="insertMarkdown('# ', '标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="一级标题">H1</button>
                         <button onclick="insertMarkdown('## ', '二级标题')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="二级标题">H2</button>
@@ -461,55 +461,50 @@
                         <button onclick="insertMarkdown('```javascript\n\n```', '代码')" class="px-3 py-1 bg-slate-800 rounded hover:bg-slate-700 transition text-sm" title="代码块">代码</button>
                     </div>
                     
-                    <!-- 编辑框容器 -->
+                    <!-- 编辑框 -->
                     <div class="flex-1 min-h-0 border border-slate-800 rounded-2xl overflow-hidden bg-slate-950/50">
-                        <!-- 编辑区域 -->
                         <textarea id="editNoteContent" 
                             class="w-full h-full bg-transparent p-5 outline-none text-sm transition-all resize-none leading-relaxed font-mono min-h-[45vh] border-0"
                             placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
                         
-                        <!-- 底部工具栏 -->
-                        <div class="flex items-center justify-between px-4 py-3 border-t border-slate-800 bg-slate-900/30">
-                            <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition flex items-center gap-1">
-                                <i class="fas fa-question-circle"></i>
-                                Markdown 语法帮助
-                            </button>
-                            <div class="text-xs text-slate-500 flex items-center gap-2">
+                        <!-- 底部状态栏 - 只保留字数统计 -->
+                        <div class="flex items-center justify-end px-4 py-3 border-t border-slate-800 bg-slate-900/30">
+                            <div class="text-xs text-slate-500">
                                 <span id="editCharCount">0</span> 字符
                             </div>
                         </div>
                     </div>
                 </div>
-            
-            <div id="previewTab" class="flex-1 overflow-y-auto hidden min-h-0">
-                <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
-                    Markdown 预览
-                </div>
-                <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[60vh]">
-                    <!-- Markdown 预览内容 -->
+                
+                <div id="previewTab" class="flex-1 overflow-y-auto hidden min-h-0">
+                    <div class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        Markdown 预览
+                    </div>
+                    <div id="markdownPreview" class="markdown-preview p-5 bg-slate-950/50 border border-slate-800 rounded-2xl flex-1 overflow-y-auto min-h-[60vh]">
+                        <!-- Markdown 预览内容 -->
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="flex gap-3 pt-6 border-t border-white/5">
-            <button onclick="closeEdit()"
-                class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
-                取消
-            </button>
-            <button onclick="saveEdit()"
-                class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
-                保存更改
-            </button>
-        </div>
-        
-        <div class="pt-4 border-t border-white/5 text-xs text-slate-500">
-            <p class="flex items-center gap-2">
-                <span class="text-yellow-400">⚠️</span>
-                注意：编辑后笔记将使用当前主密码重新加密保存到云端
-            </p>
+            
+            <div class="flex gap-3 pt-6 border-t border-white/5">
+                <button onclick="closeEdit()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
+                    取消
+                </button>
+                <button onclick="saveEdit()"
+                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
+                    保存更改
+                </button>
+            </div>
+            
+            <div class="pt-4 border-t border-white/5 text-xs text-slate-500">
+                <p class="flex items-center gap-2">
+                    <span class="text-yellow-400">⚠️</span>
+                    注意：编辑后笔记将使用当前主密码重新加密保存到云端
+                </p>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- 添加笔记弹窗 -->
     <div id="addNoteModal"
