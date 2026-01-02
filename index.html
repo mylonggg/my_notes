@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudNotes | 2026 隐私加密笔记</title>
+    <title>CloudNotes | 2026 隐私加密笔记与导航</title>
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="theme-color" content="#020617">
@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
@@ -224,6 +225,118 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px -5px rgba(220, 38, 38, 0.4);
         }
+        
+        /* 导航页面样式 */
+        .nav-gradient {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+        
+        .nav-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.4);
+        }
+        
+        /* 导航链接卡片样式 */
+        .nav-link-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .nav-link-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.3);
+            background: rgba(30, 41, 59, 0.9);
+        }
+        
+        /* 分类标签样式 */
+        .category-tag {
+            display: inline-block;
+            padding: 0.25em 0.75em;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* 图标颜色 */
+        .icon-blue { color: #60a5fa; }
+        .icon-green { color: #34d399; }
+        .icon-purple { color: #a78bfa; }
+        .icon-red { color: #f87171; }
+        .icon-yellow { color: #fbbf24; }
+        .icon-pink { color: #f472b6; }
+        .icon-indigo { color: #818cf8; }
+        
+        /* 快速访问栏 */
+        .quick-access-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .quick-access-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .quick-access-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        /* 模态框动画 */
+        .modal-enter {
+            animation: modalEnter 0.3s ease-out;
+        }
+        
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        /* 导航网格布局 */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .nav-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+            
+            .quick-access-bar {
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .quick-access-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 
@@ -235,7 +348,7 @@
                 <div class="inline-flex p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-5xl">🔐</div>
                 <div class="space-y-2">
                     <h1 class="text-3xl font-extrabold tracking-tight italic">CloudNotes</h1>
-                    <p class="text-slate-400 leading-relaxed text-sm">私有加密笔记系统<br>请输入访问密码以继续</p>
+                    <p class="text-slate-400 leading-relaxed text-sm">私有加密笔记与导航系统<br>请输入访问密码以继续</p>
                 </div>
             </div>
             
@@ -276,15 +389,28 @@
 
     <!-- 主应用界面 -->
     <div id="appContainer" class="hidden">
-        <div id="app" class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+        <div id="app" class="max-w-6xl mx-auto px-4 py-8 md:py-12">
             <!-- 动态加载区 -->
         </div>
+    </div>
+
+    <!-- 快速访问栏 -->
+    <div id="quickAccessBar" class="quick-access-bar hidden">
+        <button onclick="showAddNavLinkModal()" class="quick-access-btn nav-gradient text-white" title="添加导航链接">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button onclick="showAddNoteModal()" class="quick-access-btn gradient-btn text-white" title="添加笔记">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button onclick="scrollToTop()" class="quick-access-btn glass text-white" title="返回顶部">
+            <i class="fas fa-arrow-up"></i>
+        </button>
     </div>
 
     <!-- 极简设置弹窗 -->
     <div id="settingsModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl space-y-6">
+        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
             <h2 class="text-2xl font-extrabold tracking-tight">⚙️ 系统配置</h2>
             <div class="space-y-4">
                 <div class="space-y-1">
@@ -308,10 +434,10 @@
         </div>
     </div>
 
-    <!-- 编辑弹窗 - 大幅增加文本输入窗口高度 -->
+    <!-- 编辑弹窗 -->
     <div id="editModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col">
+        <div class="glass w-full max-w-4xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 max-h-[95vh] overflow-hidden flex flex-col modal-enter">
             <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
                 <span class="text-blue-400">✏️</span> 编辑笔记
                 <span id="editNoteId" class="text-sm text-slate-400 ml-2 font-mono"></span>
@@ -334,7 +460,6 @@
                     </div>
                     
                     <div class="flex-1 min-h-0">
-                        <!-- 将文本输入区域高度增加到原来的三倍 -->
                         <textarea id="editNoteContent" 
                             class="w-full h-full bg-slate-950/50 border border-slate-800 p-5 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 text-sm transition-all resize-none leading-relaxed font-mono min-h-[45vh]"
                             placeholder="# 标题&#10;&#10;## 二级标题&#10;&#10;- 列表项&#10;- 另一个列表项&#10;&#10;**粗体** *斜体*&#10;&#10;```javascript&#10;// 代码块&#10;console.log('Hello');&#10;```"></textarea>
@@ -378,6 +503,214 @@
         </div>
     </div>
 
+    <!-- 添加笔记弹窗 -->
+    <div id="addNoteModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-2xl p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
+            <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                <span class="text-blue-400">📝</span> 快速添加笔记
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        解密主密码
+                    </label>
+                    <input id="quickMainPw" type="password" placeholder="输入主密码以加密" 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition-all font-mono">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        笔记内容
+                    </label>
+                    <textarea id="quickNoteInput" placeholder="输入笔记内容..." 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 h-40 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed"></textarea>
+                    <div class="flex items-center gap-2 text-xs text-slate-500 mt-2">
+                        <span id="quickNoteCharCount">0</span> 字符
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeAddNoteModal()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
+                    取消
+                </button>
+                <button onclick="quickSaveNote()"
+                    class="flex-1 py-4 gradient-btn text-white font-bold rounded-2xl">
+                    保存笔记
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加导航链接弹窗 -->
+    <div id="addNavLinkModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
+            <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                <span class="text-purple-400">🔗</span> 添加导航链接
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        链接标题
+                    </label>
+                    <input id="navLinkTitle" type="text" placeholder="例如：GitHub" 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-purple-500/50 transition-all">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        链接地址
+                    </label>
+                    <input id="navLinkUrl" type="text" placeholder="https://..." 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-purple-500/50 transition-all font-mono text-sm">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        分类标签
+                    </label>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button onclick="setNavCategory('开发工具')" class="px-3 py-1 bg-blue-900/30 text-blue-400 rounded-lg hover:bg-blue-800/50 transition text-xs">开发工具</button>
+                        <button onclick="setNavCategory('日常效率')" class="px-3 py-1 bg-green-900/30 text-green-400 rounded-lg hover:bg-green-800/50 transition text-xs">日常效率</button>
+                        <button onclick="setNavCategory('设计资源')" class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-lg hover:bg-purple-800/50 transition text-xs">设计资源</button>
+                        <button onclick="setNavCategory('学习资源')" class="px-3 py-1 bg-yellow-900/30 text-yellow-400 rounded-lg hover:bg-yellow-800/50 transition text-xs">学习资源</button>
+                        <button onclick="setNavCategory('社交娱乐')" class="px-3 py-1 bg-pink-900/30 text-pink-400 rounded-lg hover:bg-pink-800/50 transition text-xs">社交娱乐</button>
+                    </div>
+                    <input id="navLinkCategory" type="text" placeholder="自定义分类或选择上方标签" 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-purple-500/50 transition-all">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        图标选择
+                    </label>
+                    <div class="flex flex-wrap gap-3 mb-2">
+                        <button onclick="setNavIcon('fas fa-globe', 'icon-blue')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-globe icon-blue"></i></button>
+                        <button onclick="setNavIcon('fas fa-code', 'icon-green')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-code icon-green"></i></button>
+                        <button onclick="setNavIcon('fas fa-tools', 'icon-yellow')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-tools icon-yellow"></i></button>
+                        <button onclick="setNavIcon('fas fa-palette', 'icon-purple')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-palette icon-purple"></i></button>
+                        <button onclick="setNavIcon('fas fa-book', 'icon-indigo')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-book icon-indigo"></i></button>
+                        <button onclick="setNavIcon('fas fa-film', 'icon-pink')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-film icon-pink"></i></button>
+                    </div>
+                    <input id="navLinkIcon" type="hidden" value="fas fa-globe">
+                    <input id="navLinkIconColor" type="hidden" value="icon-blue">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        描述（可选）
+                    </label>
+                    <textarea id="navLinkDescription" placeholder="链接的简要描述..." 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 h-24 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none"></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeAddNavLinkModal()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
+                    取消
+                </button>
+                <button onclick="saveNavLink()"
+                    class="flex-1 py-4 nav-gradient text-white font-bold rounded-2xl">
+                    保存链接
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑导航链接弹窗 -->
+    <div id="editNavLinkModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="glass w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl space-y-6 modal-enter">
+            <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2">
+                <span class="text-purple-400">✏️</span> 编辑导航链接
+                <span id="editNavLinkId" class="text-sm text-slate-400 ml-2 font-mono"></span>
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        链接标题
+                    </label>
+                    <input id="editNavLinkTitle" type="text" placeholder="例如：GitHub" 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-purple-500/50 transition-all">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        链接地址
+                    </label>
+                    <input id="editNavLinkUrl" type="text" placeholder="https://..." 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-purple-500/50 transition-all font-mono text-sm">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        分类标签
+                    </label>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        <button onclick="setEditNavCategory('开发工具')" class="px-3 py-1 bg-blue-900/30 text-blue-400 rounded-lg hover:bg-blue-800/50 transition text-xs">开发工具</button>
+                        <button onclick="setEditNavCategory('日常效率')" class="px-3 py-1 bg-green-900/30 text-green-400 rounded-lg hover:bg-green-800/50 transition text-xs">日常效率</button>
+                        <button onclick="setEditNavCategory('设计资源')" class="px-3 py-1 bg-purple-900/30 text-purple-400 rounded-lg hover:bg-purple-800/50 transition text-xs">设计资源</button>
+                        <button onclick="setEditNavCategory('学习资源')" class="px-3 py-1 bg-yellow-900/30 text-yellow-400 rounded-lg hover:bg-yellow-800/50 transition text-xs">学习资源</button>
+                        <button onclick="setEditNavCategory('社交娱乐')" class="px-3 py-1 bg-pink-900/30 text-pink-400 rounded-lg hover:bg-pink-800/50 transition text-xs">社交娱乐</button>
+                    </div>
+                    <input id="editNavLinkCategory" type="text" placeholder="自定义分类或选择上方标签" 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-purple-500/50 transition-all">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        图标选择
+                    </label>
+                    <div class="flex flex-wrap gap-3 mb-2">
+                        <button onclick="setEditNavIcon('fas fa-globe', 'icon-blue')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-globe icon-blue"></i></button>
+                        <button onclick="setEditNavIcon('fas fa-code', 'icon-green')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-code icon-green"></i></button>
+                        <button onclick="setEditNavIcon('fas fa-tools', 'icon-yellow')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-tools icon-yellow"></i></button>
+                        <button onclick="setEditNavIcon('fas fa-palette', 'icon-purple')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-palette icon-purple"></i></button>
+                        <button onclick="setEditNavIcon('fas fa-book', 'icon-indigo')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-book icon-indigo"></i></button>
+                        <button onclick="setEditNavIcon('fas fa-film', 'icon-pink')" class="p-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition"><i class="fas fa-film icon-pink"></i></button>
+                    </div>
+                    <div id="editNavIconPreview" class="text-center py-2">
+                        <!-- 图标预览 -->
+                    </div>
+                    <input id="editNavLinkIcon" type="hidden">
+                    <input id="editNavLinkIconColor" type="hidden">
+                </div>
+                
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                        描述（可选）
+                    </label>
+                    <textarea id="editNavLinkDescription" placeholder="链接的简要描述..." 
+                        class="w-full bg-slate-950/50 border border-slate-800 p-4 h-24 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none"></textarea>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="closeEditNavLinkModal()"
+                    class="flex-1 py-4 text-slate-400 font-semibold rounded-2xl hover:bg-slate-800 transition">
+                    取消
+                </button>
+                <button onclick="updateNavLink()"
+                    class="flex-1 py-4 nav-gradient text-white font-bold rounded-2xl">
+                    更新链接
+                </button>
+            </div>
+            
+            <div class="pt-4 border-t border-white/5">
+                <button onclick="confirmDeleteNavLink()" class="w-full py-3 bg-rose-900/30 text-rose-400 rounded-2xl hover:bg-rose-800/50 transition font-semibold">
+                    🗑️ 删除此链接
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== 系统配置 ====================
         const urlParams = new URLSearchParams(window.location.search);
@@ -391,19 +724,23 @@
 
         // 当前编辑的笔记ID
         let currentEditId = null;
+        // 当前编辑的导航链接ID
+        let currentEditNavLinkId = null;
+        
         // 全局缓存笔记数据
         let notesCache = {};
+        // 全局缓存导航数据
+        let navLinksCache = {};
+        // 当前活动视图：'notes' 或 'nav'
+        let currentView = 'notes';
 
         const app = document.getElementById('app');
 
         // ==================== 安全配置 ====================
-        // 会话存储密钥
         const SESSION_KEY = 'cloudnotes_auth_token';
         const ATTEMPTS_KEY = 'cloudnotes_auth_attempts';
-        
-        // 最大尝试次数
         const MAX_ATTEMPTS = 5;
-        const LOCKOUT_TIME = 300000; // 5分钟（毫秒）
+        const LOCKOUT_TIME = 300000;
         const LOCKOUT_KEY = 'cloudnotes_lockout_until';
 
         // ==================== 加解密逻辑 ====================
@@ -521,18 +858,15 @@
                 return;
             }
             
-            // 显示加载状态
             verifyBtn.classList.add('hidden');
             loadingSpinner.classList.remove('hidden');
             input.disabled = true;
             
             try {
-                // 调用后端验证API
                 const response = await fetch(`${API_URL}/api/verify-password`, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': ADMIN_KEY 
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ password: password })
                 });
@@ -540,21 +874,16 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    // 创建会话令牌
                     const token = btoa(Date.now() + '-' + Math.random().toString(36).substr(2));
                     sessionStorage.setItem(SESSION_KEY, token);
                     
-                    // 重置失败尝试
                     resetFailedAttempts();
                     
-                    // 显示主应用界面
                     document.getElementById('authModal').classList.add('hidden');
                     document.getElementById('appContainer').classList.remove('hidden');
                     
-                    // 初始化应用
                     initApp();
                 } else {
-                    // 密码错误
                     const attempts = incrementFailedAttempts();
                     const newRemaining = MAX_ATTEMPTS - attempts;
                     
@@ -579,7 +908,6 @@
                     attemptsCount.innerHTML = `剩余尝试次数: ${remainingAttempts + 1}`;
                 }, 500);
             } finally {
-                // 恢复按钮状态
                 verifyBtn.classList.remove('hidden');
                 loadingSpinner.classList.add('hidden');
                 input.disabled = false;
@@ -598,23 +926,19 @@
         // ==================== 应用初始化逻辑 ====================
         function initApp() {
             if (shareId) {
-                // 分享模式：直接显示分享页面，不需要密码
                 renderShareView();
             } else if (!API_URL) {
-                // 未配置API：显示配置页面
                 renderWelcomeView();
             } else {
-                // 正常模式：显示主应用
                 renderMainView();
             }
         }
         
-        // ==================== 检查会话（修改版） ====================
+        // 检查会话
         function checkSession() {
             const token = sessionStorage.getItem(SESSION_KEY);
             const apiUrl = localStorage.getItem('cf_notes_api');
             
-            // 1. 如果是分享模式，直接显示分享页面
             if (shareId) {
                 document.getElementById('authModal').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
@@ -622,7 +946,6 @@
                 return true;
             }
             
-            // 2. 如果没有配置API URL，直接进入配置界面（不需要密码）
             if (!apiUrl) {
                 document.getElementById('authModal').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
@@ -630,14 +953,12 @@
                 return false;
             }
             
-            // 3. 正常访问：检查会话令牌
             if (token) {
                 try {
                     const parts = atob(token).split('-');
                     if (parts.length === 2) {
                         const timestamp = parseInt(parts[0]);
                         const now = Date.now();
-                        // 检查token是否过期（8小时）
                         if (now - timestamp < 8 * 60 * 60 * 1000) {
                             document.getElementById('authModal').classList.add('hidden');
                             document.getElementById('appContainer').classList.remove('hidden');
@@ -650,11 +971,9 @@
                 }
             }
             
-            // 4. 需要登录：显示登录界面
             document.getElementById('authModal').classList.remove('hidden');
             document.getElementById('appContainer').classList.add('hidden');
             
-            // 检查锁定状态
             const lockoutCheck = checkLockout();
             if (lockoutCheck.locked) {
                 const attemptsCount = document.getElementById('attemptsCount');
@@ -672,13 +991,14 @@
             return false;
         }
 
+        // ==================== 视图渲染函数 ====================
         function renderWelcomeView() {
             app.innerHTML = `
             <div class="glass p-12 rounded-[3rem] text-center space-y-8 animate-in fade-in zoom-in duration-700">
-                <div class="inline-flex p-5 bg-blue-500/10 rounded-full text-5xl">🛡️</div>
+                <div class="inline-flex p-5 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full text-5xl">🚀</div>
                 <div class="space-y-2">
                     <h1 class="text-4xl font-extrabold tracking-tight italic">CloudNotes</h1>
-                    <p class="text-slate-400 leading-relaxed">您的专属分布式加密笔记系统<br>请先关联您的 Cloudflare Worker 后端</p>
+                    <p class="text-slate-400 leading-relaxed">您的专属加密笔记与个人导航系统<br>请先关联您的 Cloudflare Worker 后端</p>
                 </div>
                 <button onclick="configUrl()" class="px-10 py-5 gradient-btn text-white font-black rounded-3xl shadow-2xl">初始化配置</button>
             </div>
@@ -691,9 +1011,13 @@
                 <header class="flex justify-between items-end">
                     <div class="space-y-1">
                         <h1 class="text-4xl font-extrabold tracking-tighter bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">CloudNotes</h1>
-                        <p class="text-[10px] uppercase tracking-[0.3em] text-blue-500 font-black">端到端加密保险库 | 支持 Markdown</p>
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-blue-500 font-black">端到端加密笔记 | 个人导航中心</p>
                     </div>
                     <div class="flex items-center gap-4">
+                        <div class="flex gap-2">
+                            <button onclick="switchView('notes')" class="px-4 py-2 rounded-xl ${currentView === 'notes' ? 'gradient-btn text-white' : 'glass text-slate-400'} transition">📝 笔记</button>
+                            <button onclick="switchView('nav')" class="px-4 py-2 rounded-xl ${currentView === 'nav' ? 'nav-gradient text-white' : 'glass text-slate-400'} transition">🔗 导航</button>
+                        </div>
                         <button onclick="logout()" class="text-xs text-slate-400 hover:text-white transition px-3 py-1 glass rounded-full" title="退出登录">
                             退出
                         </button>
@@ -701,49 +1025,87 @@
                     </div>
                 </header>
 
-                <main class="glass p-8 rounded-[2.5rem] shadow-2xl space-y-6 border-white/5">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
-                                解密主密码
-                            </label>
-                            <input id="mainPw" type="password" placeholder="输入主密码以加密/解密数据" 
-                                class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition-all font-mono">
+                <div id="notesView" class="${currentView === 'notes' ? '' : 'hidden'}">
+                    <main class="glass p-8 rounded-[2.5rem] shadow-2xl space-y-6 border-white/5 mb-8">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 mb-2 block">
+                                    解密主密码
+                                </label>
+                                <input id="mainPw" type="password" placeholder="输入主密码以加密/解密数据" 
+                                    class="w-full bg-slate-950/50 border border-slate-800 p-4 rounded-2xl outline-none focus:ring-2 ring-blue-500/50 transition-all font-mono">
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 block">
+                                        笔记内容 (支持 Markdown 格式)
+                                    </label>
+                                    <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition">📖 Markdown 语法帮助</button>
+                                </div>
+                                <textarea id="noteInput" placeholder="# 输入您的 Markdown 笔记...&#10;&#10;## 支持功能&#10;- 标题、列表、代码块&#10;- **粗体**、*斜体*、[链接]()&#10;- 表格、引用、分割线" 
+                                    class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed font-mono"></textarea>
+                                <div class="flex items-center gap-2 text-xs text-slate-500 mt-2">
+                                    <span id="noteCharCount">0</span> 字符
+                                </div>
+                            </div>
                         </div>
                         
-                        <div>
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-1 block">
-                                    笔记内容 (支持 Markdown 格式)
-                                </label>
-                                <button onclick="showMarkdownHelp()" class="text-xs text-blue-400 hover:text-blue-300 transition">📖 Markdown 语法帮助</button>
-                            </div>
-                            <textarea id="noteInput" placeholder="# 输入您的 Markdown 笔记...&#10;&#10;## 支持功能&#10;- 标题、列表、代码块&#10;- **粗体**、*斜体*、[链接]()&#10;- 表格、引用、分割线" 
-                                class="w-full bg-slate-950/50 border border-slate-800 p-5 h-64 rounded-2xl outline-none focus:bg-slate-950 transition-all resize-none leading-relaxed font-mono"></textarea>
-                            <div class="flex items-center gap-2 text-xs text-slate-500 mt-2">
-                                <span id="noteCharCount">0</span> 字符
-                            </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button onclick="doSave()" class="gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:shadow-lg transition">加密存入云端</button>
+                            <button onclick="doAI()" class="glass text-purple-400 py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:bg-purple-500/10 transition border-purple-500/20">✨ AI 智能总结</button>
                         </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <button onclick="doSave()" class="gradient-btn text-white py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:shadow-lg transition">加密存入云端</button>
-                        <button onclick="doAI()" class="glass text-purple-400 py-5 rounded-2xl font-black tracking-widest uppercase text-xs hover:bg-purple-500/10 transition border-purple-500/20">✨ AI 智能总结</button>
-                    </div>
-                </main>
+                    </main>
 
-                <section class="space-y-6">
-                    <div class="flex justify-between items-center px-4">
-                        <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 italic">Vault / 我的加密库</h2>
-                        <div class="flex gap-2">
-                            <button onclick="showMarkdownHelp()" class="text-blue-400 text-xs font-black hover:underline">Markdown 语法</button>
-                            <button onclick="loadList()" class="text-blue-500 text-xs font-black hover:underline uppercase">刷新列表</button>
+                    <section class="space-y-6">
+                        <div class="flex justify-between items-center px-4">
+                            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 italic">Vault / 我的加密库</h2>
+                            <div class="flex gap-2">
+                                <button onclick="showMarkdownHelp()" class="text-blue-400 text-xs font-black hover:underline">Markdown 语法</button>
+                                <button onclick="loadNotesList()" class="text-blue-500 text-xs font-black hover:underline uppercase">刷新列表</button>
+                            </div>
                         </div>
-                    </div>
-                    <div id="notesList" class="space-y-6">
-                        <div class="text-center py-20 text-slate-600 italic text-sm">配置完成后输入密码并点击刷新。</div>
-                    </div>
-                </section>
+                        <div id="notesList" class="space-y-6">
+                            <div class="text-center py-20 text-slate-600 italic text-sm">配置完成后输入密码并点击刷新。</div>
+                        </div>
+                    </section>
+                </div>
+
+                <div id="navView" class="${currentView === 'nav' ? '' : 'hidden'}">
+                    <main class="glass p-8 rounded-[2.5rem] shadow-2xl space-y-6 border-white/5 mb-8">
+                        <div class="space-y-4">
+                            <div class="text-center space-y-2">
+                                <h2 class="text-2xl font-extrabold tracking-tight text-purple-300">🔗 个人导航中心</h2>
+                                <p class="text-slate-400 text-sm">管理您的常用链接，快速访问重要资源</p>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-3 justify-center">
+                                <button onclick="showAddNavLinkModal()" class="px-6 py-3 nav-gradient text-white rounded-2xl font-bold hover:shadow-lg transition flex items-center gap-2">
+                                    <i class="fas fa-plus"></i> 添加链接
+                                </button>
+                                <button onclick="loadNavLinks()" class="px-6 py-3 glass text-purple-400 rounded-2xl font-bold hover:bg-purple-500/10 transition flex items-center gap-2">
+                                    <i class="fas fa-sync-alt"></i> 刷新列表
+                                </button>
+                                <button onclick="exportNavLinks()" class="px-6 py-3 glass text-emerald-400 rounded-2xl font-bold hover:bg-emerald-500/10 transition flex items-center gap-2">
+                                    <i class="fas fa-download"></i> 导出备份
+                                </button>
+                            </div>
+                        </div>
+                    </main>
+
+                    <section class="space-y-8">
+                        <div class="flex justify-between items-center px-4">
+                            <h2 class="text-xs font-black uppercase tracking-[0.2em] text-slate-500 italic">Navigation / 我的链接库</h2>
+                            <div class="text-xs text-slate-500" id="navStats">
+                                <!-- 统计信息 -->
+                            </div>
+                        </div>
+                        
+                        <div id="navCategories" class="space-y-8">
+                            <div class="text-center py-20 text-slate-600 italic text-sm">点击"刷新列表"加载您的导航链接</div>
+                        </div>
+                    </section>
+                </div>
                 
                 <footer class="text-center pt-8 pb-4 opacity-50 hover:opacity-100 transition duration-500">
                     <span class="text-3xl font-black uppercase tracking-widest text-red-500">
@@ -761,6 +1123,17 @@
                     noteCharCount.textContent = this.value.length;
                 });
             }
+            
+            // 加载默认视图数据
+            if (currentView === 'notes') {
+                // 笔记视图不需要自动加载，需要密码
+            } else {
+                // 导航视图自动加载
+                loadNavLinks();
+            }
+            
+            // 显示快速访问栏
+            document.getElementById('quickAccessBar').classList.remove('hidden');
         }
 
         function renderShareView() {
@@ -814,6 +1187,506 @@
             }
         }
 
+        // ==================== 视图切换 ====================
+        function switchView(view) {
+            currentView = view;
+            renderMainView();
+        }
+
+        // ==================== 导航功能 ====================
+        // 加载导航链接
+        async function loadNavLinks() {
+            try {
+                const response = await fetch(`${API_URL}/api/nav/list`, {
+                    headers: { 'Authorization': ADMIN_KEY }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('获取导航链接失败');
+                }
+                
+                const navLinks = await response.json();
+                
+                // 缓存导航链接
+                navLinksCache = {};
+                navLinks.forEach(link => {
+                    navLinksCache[link.id] = link;
+                });
+                
+                // 按分类分组
+                const categories = {};
+                navLinks.forEach(link => {
+                    const category = link.category || '未分类';
+                    if (!categories[category]) {
+                        categories[category] = [];
+                    }
+                    categories[category].push(link);
+                });
+                
+                // 渲染分类
+                const navCategoriesDiv = document.getElementById('navCategories');
+                if (navLinks.length === 0) {
+                    navCategoriesDiv.innerHTML = `
+                        <div class="text-center py-20 space-y-4">
+                            <div class="text-5xl text-slate-700">🔗</div>
+                            <p class="text-slate-600 italic">暂无导航链接，点击"添加链接"开始创建</p>
+                        </div>
+                    `;
+                    document.getElementById('navStats').textContent = '0 个链接';
+                    return;
+                }
+                
+                let html = '';
+                const categoryNames = Object.keys(categories).sort();
+                
+                categoryNames.forEach(category => {
+                    const links = categories[category];
+                    html += `
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-bold text-slate-300 flex items-center gap-2">
+                                <span class="category-tag bg-purple-900/30 text-purple-400">${category}</span>
+                                <span class="text-sm text-slate-500">(${links.length}个链接)</span>
+                            </h3>
+                            <div class="nav-grid">
+                    `;
+                    
+                    links.forEach(link => {
+                        const iconClass = link.icon || 'fas fa-globe';
+                        const iconColor = link.icon_color || 'icon-blue';
+                        const description = link.description ? `<p class="text-xs text-slate-500 mt-1 line-clamp-2">${link.description}</p>` : '';
+                        
+                        html += `
+                            <div class="nav-link-card glass p-5 rounded-2xl space-y-3 cursor-pointer" onclick="openLinkInNewTab('${link.url}')" title="点击访问: ${link.url}">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 bg-slate-800/50 rounded-lg">
+                                            <i class="${iconClass} ${iconColor} text-lg"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-slate-200">${link.title}</h4>
+                                            ${description}
+                                        </div>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); editNavLink(${link.id})" class="p-2 text-slate-500 hover:text-purple-400 transition" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-slate-500">
+                                    <span class="truncate font-mono" title="${link.url}">${link.url.replace(/https?:\/\//, '')}</span>
+                                    <span>${new Date(link.created_at).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                navCategoriesDiv.innerHTML = html;
+                
+                // 更新统计信息
+                document.getElementById('navStats').textContent = `${navLinks.length} 个链接，${categoryNames.length} 个分类`;
+                
+            } catch (error) {
+                console.error('加载导航链接失败:', error);
+                const navCategoriesDiv = document.getElementById('navCategories');
+                navCategoriesDiv.innerHTML = `
+                    <div class="text-center py-20 text-slate-700 italic text-sm">
+                        加载失败，请检查网络连接或配置
+                    </div>
+                `;
+            }
+        }
+        
+        // 打开链接（新标签页）
+        function openLinkInNewTab(url) {
+            window.open(url, '_blank');
+        }
+        
+        // 显示添加导航链接弹窗
+        function showAddNavLinkModal() {
+            document.getElementById('addNavLinkModal').classList.remove('hidden');
+            // 重置表单
+            document.getElementById('navLinkTitle').value = '';
+            document.getElementById('navLinkUrl').value = '';
+            document.getElementById('navLinkCategory').value = '日常效率';
+            document.getElementById('navLinkIcon').value = 'fas fa-globe';
+            document.getElementById('navLinkIconColor').value = 'icon-blue';
+            document.getElementById('navLinkDescription').value = '';
+        }
+        
+        // 关闭添加导航链接弹窗
+        function closeAddNavLinkModal() {
+            document.getElementById('addNavLinkModal').classList.add('hidden');
+        }
+        
+        // 设置导航分类
+        function setNavCategory(category) {
+            document.getElementById('navLinkCategory').value = category;
+        }
+        
+        // 设置导航图标
+        function setNavIcon(icon, color) {
+            document.getElementById('navLinkIcon').value = icon;
+            document.getElementById('navLinkIconColor').value = color;
+        }
+        
+        // 保存导航链接
+        async function saveNavLink() {
+            const title = document.getElementById('navLinkTitle').value.trim();
+            const url = document.getElementById('navLinkUrl').value.trim();
+            const category = document.getElementById('navLinkCategory').value.trim() || '未分类';
+            const icon = document.getElementById('navLinkIcon').value;
+            const icon_color = document.getElementById('navLinkIconColor').value;
+            const description = document.getElementById('navLinkDescription').value.trim();
+            
+            if (!title || !url) {
+                alert("请填写链接标题和地址");
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert("链接地址格式不正确，请以 http:// 或 https:// 开头");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/nav/save`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({
+                        title,
+                        url,
+                        category,
+                        icon,
+                        icon_color,
+                        description
+                    })
+                });
+                
+                if (response.ok) {
+                    alert("✅ 导航链接已保存");
+                    closeAddNavLinkModal();
+                    loadNavLinks();
+                } else {
+                    alert("❌ 保存失败");
+                }
+            } catch (error) {
+                console.error('保存导航链接失败:', error);
+                alert("❌ 网络连接失败");
+            }
+        }
+        
+        // 编辑导航链接
+        async function editNavLink(id) {
+            const link = navLinksCache[id];
+            if (!link) {
+                alert("链接不存在");
+                return;
+            }
+            
+            currentEditNavLinkId = id;
+            document.getElementById('editNavLinkId').textContent = `#${id}`;
+            document.getElementById('editNavLinkTitle').value = link.title;
+            document.getElementById('editNavLinkUrl').value = link.url;
+            document.getElementById('editNavLinkCategory').value = link.category || '未分类';
+            document.getElementById('editNavLinkIcon').value = link.icon || 'fas fa-globe';
+            document.getElementById('editNavLinkIconColor').value = link.icon_color || 'icon-blue';
+            document.getElementById('editNavLinkDescription').value = link.description || '';
+            
+            // 显示图标预览
+            const iconPreview = document.getElementById('editNavIconPreview');
+            iconPreview.innerHTML = `<i class="${link.icon || 'fas fa-globe'} ${link.icon_color || 'icon-blue'} text-2xl"></i>`;
+            
+            document.getElementById('editNavLinkModal').classList.remove('hidden');
+        }
+        
+        // 设置编辑导航分类
+        function setEditNavCategory(category) {
+            document.getElementById('editNavLinkCategory').value = category;
+        }
+        
+        // 设置编辑导航图标
+        function setEditNavIcon(icon, color) {
+            document.getElementById('editNavLinkIcon').value = icon;
+            document.getElementById('editNavLinkIconColor').value = color;
+            const iconPreview = document.getElementById('editNavIconPreview');
+            iconPreview.innerHTML = `<i class="${icon} ${color} text-2xl"></i>`;
+        }
+        
+        // 关闭编辑导航链接弹窗
+        function closeEditNavLinkModal() {
+            document.getElementById('editNavLinkModal').classList.add('hidden');
+            currentEditNavLinkId = null;
+        }
+        
+        // 更新导航链接
+        async function updateNavLink() {
+            const title = document.getElementById('editNavLinkTitle').value.trim();
+            const url = document.getElementById('editNavLinkUrl').value.trim();
+            const category = document.getElementById('editNavLinkCategory').value.trim() || '未分类';
+            const icon = document.getElementById('editNavLinkIcon').value;
+            const icon_color = document.getElementById('editNavLinkIconColor').value;
+            const description = document.getElementById('editNavLinkDescription').value.trim();
+            
+            if (!title || !url) {
+                alert("请填写链接标题和地址");
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert("链接地址格式不正确，请以 http:// 或 https:// 开头");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/nav/save`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({
+                        id: currentEditNavLinkId,
+                        title,
+                        url,
+                        category,
+                        icon,
+                        icon_color,
+                        description
+                    })
+                });
+                
+                if (response.ok) {
+                    alert("✅ 导航链接已更新");
+                    closeEditNavLinkModal();
+                    loadNavLinks();
+                } else {
+                    alert("❌ 更新失败");
+                }
+            } catch (error) {
+                console.error('更新导航链接失败:', error);
+                alert("❌ 网络连接失败");
+            }
+        }
+        
+        // 确认删除导航链接
+        function confirmDeleteNavLink() {
+            if (confirm("确定要删除这个导航链接吗？此操作不可撤销。")) {
+                deleteNavLink(currentEditNavLinkId);
+            }
+        }
+        
+        // 删除导航链接
+        async function deleteNavLink(id) {
+            try {
+                const response = await fetch(`${API_URL}/api/nav/delete`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({ id })
+                });
+                
+                if (response.ok) {
+                    alert("✅ 导航链接已删除");
+                    closeEditNavLinkModal();
+                    loadNavLinks();
+                } else {
+                    alert("❌ 删除失败");
+                }
+            } catch (error) {
+                console.error('删除导航链接失败:', error);
+                alert("❌ 网络连接失败");
+            }
+        }
+        
+        // 导出导航链接
+        async function exportNavLinks() {
+            try {
+                const response = await fetch(`${API_URL}/api/nav/list`, {
+                    headers: { 'Authorization': ADMIN_KEY }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('获取导航链接失败');
+                }
+                
+                const navLinks = await response.json();
+                
+                // 格式化为JSON
+                const exportData = {
+                    export_date: new Date().toISOString(),
+                    total_links: navLinks.length,
+                    categories: {},
+                    links: navLinks
+                };
+                
+                // 按分类分组
+                navLinks.forEach(link => {
+                    const category = link.category || '未分类';
+                    if (!exportData.categories[category]) {
+                        exportData.categories[category] = [];
+                    }
+                    exportData.categories[category].push(link.title);
+                });
+                
+                // 创建下载
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `CloudNotes_Nav_Export_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('导出导航链接失败:', error);
+                alert("❌ 导出失败");
+            }
+        }
+
+        // ==================== 笔记功能 ====================
+        // 显示添加笔记弹窗
+        function showAddNoteModal() {
+            document.getElementById('addNoteModal').classList.remove('hidden');
+            // 重置表单
+            document.getElementById('quickMainPw').value = '';
+            document.getElementById('quickNoteInput').value = '';
+            document.getElementById('quickNoteCharCount').textContent = '0';
+            
+            // 添加字符计数监听
+            const quickNoteInput = document.getElementById('quickNoteInput');
+            const quickNoteCharCount = document.getElementById('quickNoteCharCount');
+            quickNoteInput.addEventListener('input', function() {
+                quickNoteCharCount.textContent = this.value.length;
+            });
+        }
+        
+        // 关闭添加笔记弹窗
+        function closeAddNoteModal() {
+            document.getElementById('addNoteModal').classList.add('hidden');
+        }
+        
+        // 快速保存笔记
+        async function quickSaveNote() {
+            const text = document.getElementById('quickNoteInput').value;
+            const pw = document.getElementById('quickMainPw').value;
+            
+            if (!text || !pw) {
+                alert("请填写内容和密码");
+                return;
+            }
+            
+            try {
+                const cipher = await encrypt(text, pw);
+                
+                const res = await fetch(`${API_URL}/api/save`, {
+                    method: 'POST', 
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({ content: cipher })
+                });
+                
+                if (res.ok) { 
+                    alert("✅ 笔记已存入安全库"); 
+                    closeAddNoteModal();
+                    if (currentView === 'notes') {
+                        loadNotesList();
+                    }
+                } else {
+                    alert("❌ 保存失败");
+                }
+            } catch (e) { 
+                alert("❌ 网络连接失败"); 
+            }
+        }
+        
+        // 加载笔记列表
+        async function loadNotesList() {
+            const pw = document.getElementById('mainPw').value; 
+            if (!pw) return alert("请输入密码解密");
+            
+            const listDiv = document.getElementById('notesList');
+            listDiv.innerHTML = '<div class="text-center py-12 text-slate-600 italic text-sm">加载中...</div>';
+            
+            try {
+                const res = await fetch(`${API_URL}/api/list`, { headers: { 'Authorization': ADMIN_KEY } });
+                const notes = await res.json(); 
+                listDiv.innerHTML = "";
+                
+                if (notes.length === 0) {
+                    listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">暂无数据</div>';
+                    return;
+                }
+                
+                notesCache = {};
+                
+                for (let n of notes) {
+                    const clearText = await decrypt(n.content, pw);
+                    if (!clearText) {
+                        continue;
+                    }
+                    
+                    notesCache[n.id] = {
+                        id: n.id,
+                        clearText: clearText,
+                        created_at: n.created_at
+                    };
+                    
+                    const isMarkdown = clearText.includes('# ') || clearText.includes('## ') || clearText.includes('```') || 
+                                       clearText.includes('**') || clearText.includes('- ') || clearText.includes('> ');
+                    
+                    const card = document.createElement('div');
+                    card.className = "note-card glass p-6 rounded-3xl space-y-4 border border-white/5 shadow-lg group";
+                    
+                    let previewContent = clearText;
+                    let showFullButton = false;
+                    
+                    if (clearText.length > 300) {
+                        previewContent = clearText.substring(0, 300) + '...';
+                        showFullButton = true;
+                    }
+                    
+                    const renderedContent = isMarkdown ? marked.parse(previewContent) : 
+                                            `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
+                    
+                    card.innerHTML = `
+                    <div class="flex justify-between text-[9px] font-black text-slate-500 tracking-widest uppercase italic">
+                        <span>索引编号 #${n.id}</span>
+                        <span>${new Date(n.created_at).toLocaleString()}</span>
+                    </div>
+                    <div class="markdown-preview text-slate-300 text-sm leading-relaxed" id="noteContent-${n.id}">
+                        ${renderedContent}
+                        ${showFullButton ? `<button onclick="toggleNoteContent(${n.id})" class="text-blue-400 text-xs mt-2 hover:underline transition">显示全部</button>` : ''}
+                    </div>
+                    <div class="pt-4 border-t border-white/5 flex flex-wrap gap-4 items-center">
+                        <button onclick="doShareCopy('${n.content.replace(/'/g, "\\'")}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成分享链接</button>
+                        <button onclick="doExport(\`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${n.id})" class="text-xs font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition">💾 导出备份</button>
+                        <button onclick="openEdit(${n.id}, \`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" class="text-xs font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition">✏️ 编辑</button>
+                        <button onclick="doDelete(${n.id})" class="text-xs font-black text-rose-500 uppercase tracking-widest ml-auto opacity-40 group-hover:opacity-100 transition">🗑️ 删除</button>
+                    </div>
+                `;
+                    listDiv.appendChild(card);
+                }
+                
+                hljs.highlightAll();
+            } catch (e) { 
+                console.error('加载列表失败:', e);
+                listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">拉取失败，请检查网络连接</div>';
+            }
+        }
+
+        // ==================== 通用功能 ====================
         /* --- 功能逻辑 --- */
         function configUrl() {
             document.getElementById('settingsModal').classList.remove('hidden');
@@ -896,7 +1769,6 @@ console.log('Hello');
                 editTabBtn.classList.remove('active');
                 previewTabBtn.classList.add('active');
                 
-                // 更新预览
                 const previewDiv = document.getElementById('markdownPreview');
                 previewDiv.innerHTML = marked.parse(editContent.value || '');
                 hljs.highlightAll();
@@ -910,13 +1782,11 @@ console.log('Hello');
             const selectedText = textarea.value.substring(start, end);
             
             if (selectedText) {
-                // 如果已选择文本，则围绕它插入语法
                 const newText = syntax + selectedText + (syntax.startsWith('*') || syntax.startsWith('_') ? syntax : '');
                 textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
                 textarea.selectionStart = start;
                 textarea.selectionEnd = start + newText.length;
             } else {
-                // 如果未选择文本，则插入语法和占位符
                 const placeholderText = syntax.includes('\n') ? syntax.replace('\n\n```', '\n' + placeholder + '\n```') : syntax + placeholder;
                 textarea.value = textarea.value.substring(0, start) + placeholderText + textarea.value.substring(end);
                 textarea.selectionStart = start + syntax.length;
@@ -945,13 +1815,10 @@ console.log('Hello');
             }
             
             try {
-                // 加密内容
                 const cipher = await encrypt(text, pw);
                 
-                // 构建请求体
                 const body = { content: cipher };
                 
-                // 如果是编辑模式，添加ID
                 if (id !== null) {
                     body.id = id;
                 }
@@ -973,7 +1840,7 @@ console.log('Hello');
                     } else {
                         alert("✅ 笔记已更新");
                     }
-                    loadList();
+                    loadNotesList();
                     return true;
                 } else {
                     alert("❌ 保存失败");
@@ -982,86 +1849,6 @@ console.log('Hello');
             } catch (e) { 
                 alert("❌ 网络连接失败"); 
                 return false;
-            }
-        }
-
-        async function loadList() {
-            const pw = document.getElementById('mainPw').value; 
-            if (!pw) return alert("请输入密码解密");
-            
-            const listDiv = document.getElementById('notesList');
-            listDiv.innerHTML = '<div class="text-center py-12 text-slate-600 italic text-sm">加载中...</div>';
-            
-            try {
-                const res = await fetch(`${API_URL}/api/list`, { headers: { 'Authorization': ADMIN_KEY } });
-                const notes = await res.json(); 
-                listDiv.innerHTML = "";
-                
-                if (notes.length === 0) {
-                    listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">暂无数据</div>';
-                    return;
-                }
-                
-                // 清空缓存
-                notesCache = {};
-                
-                for (let n of notes) {
-                    const clearText = await decrypt(n.content, pw);
-                    if (!clearText) {
-                        continue; // 跳过密码不匹配的笔记
-                    }
-                    
-                    // 缓存笔记内容
-                    notesCache[n.id] = {
-                        id: n.id,
-                        clearText: clearText,
-                        created_at: n.created_at
-                    };
-                    
-                    // 判断是否为 Markdown 内容（简单检测）
-                    const isMarkdown = clearText.includes('# ') || clearText.includes('## ') || clearText.includes('```') || 
-                                       clearText.includes('**') || clearText.includes('- ') || clearText.includes('> ');
-                    
-                    const card = document.createElement('div');
-                    card.className = "note-card glass p-6 rounded-3xl space-y-4 border border-white/5 shadow-lg group";
-                    
-                    // 创建预览内容（如果内容太长则截断）
-                    let previewContent = clearText;
-                    let showFullButton = false;
-                    
-                    if (clearText.length > 300) {
-                        previewContent = clearText.substring(0, 300) + '...';
-                        showFullButton = true;
-                    }
-                    
-                    // 渲染预览内容（Markdown 或纯文本）
-                    const renderedContent = isMarkdown ? marked.parse(previewContent) : 
-                                            `<div class="whitespace-pre-wrap">${previewContent.replace(/\n/g, '<br>')}</div>`;
-                    
-                    card.innerHTML = `
-                    <div class="flex justify-between text-[9px] font-black text-slate-500 tracking-widest uppercase italic">
-                        <span>索引编号 #${n.id}</span>
-                        <span>${new Date(n.created_at).toLocaleString()}</span>
-                    </div>
-                    <div class="markdown-preview text-slate-300 text-sm leading-relaxed" id="noteContent-${n.id}">
-                        ${renderedContent}
-                        ${showFullButton ? `<button onclick="toggleNoteContent(${n.id})" class="text-blue-400 text-xs mt-2 hover:underline transition">显示全部</button>` : ''}
-                    </div>
-                    <div class="pt-4 border-t border-white/5 flex flex-wrap gap-4 items-center">
-                        <button onclick="doShareCopy('${n.content.replace(/'/g, "\\'")}')" class="text-xs font-black text-blue-400 uppercase tracking-widest hover:text-blue-300 transition">📤 生成分享链接</button>
-                        <button onclick="doExport(\`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, ${n.id})" class="text-xs font-black text-emerald-500 uppercase tracking-widest hover:text-emerald-400 transition">💾 导出备份</button>
-                        <button onclick="openEdit(${n.id}, \`${clearText.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" class="text-xs font-black text-amber-500 uppercase tracking-widest hover:text-amber-400 transition">✏️ 编辑</button>
-                        <button onclick="doDelete(${n.id})" class="text-xs font-black text-rose-500 uppercase tracking-widest ml-auto opacity-40 group-hover:opacity-100 transition">🗑️ 删除</button>
-                    </div>
-                `;
-                    listDiv.appendChild(card);
-                }
-                
-                // 高亮代码块
-                hljs.highlightAll();
-            } catch (e) { 
-                console.error('加载列表失败:', e);
-                listDiv.innerHTML = '<div class="text-center py-20 text-slate-700 italic text-sm">拉取失败，请检查网络连接</div>';
             }
         }
 
@@ -1078,24 +1865,20 @@ console.log('Hello');
             const currentContent = contentDiv.innerHTML;
             const showFullText = currentContent.includes('显示全部');
             
-            // 判断是否为 Markdown 内容
             const isMarkdown = note.clearText.includes('# ') || note.clearText.includes('## ') || 
                                note.clearText.includes('```') || note.clearText.includes('**') ||
                                note.clearText.includes('- ') || note.clearText.includes('> ');
             
             if (showFullText) {
-                // 显示全部内容
                 const renderedContent = isMarkdown ? marked.parse(note.clearText) : 
                                         `<div class="whitespace-pre-wrap">${note.clearText.replace(/\n/g, '<br>')}</div>`;
                 contentDiv.innerHTML = renderedContent + 
                     `<button onclick="toggleNoteContent(${id})" class="text-blue-400 text-xs mt-2 hover:underline transition">收起</button>`;
                 
-                // 重新高亮代码块
                 setTimeout(() => {
                     hljs.highlightAll();
                 }, 100);
             } else {
-                // 显示预览内容
                 let previewContent = note.clearText;
                 if (note.clearText.length > 300) {
                     previewContent = note.clearText.substring(0, 300) + '...';
@@ -1114,19 +1897,15 @@ console.log('Hello');
             document.getElementById('editNoteId').textContent = `#${id}`;
             document.getElementById('editNoteContent').value = content;
             
-            // 更新字符计数
             updateCharCount();
             
-            // 监听输入更新字符计数
             const textarea = document.getElementById('editNoteContent');
             textarea.addEventListener('input', updateCharCount);
             
-            // 切换到编辑标签
             switchTab('edit');
             
             document.getElementById('editModal').classList.remove('hidden');
             
-            // 聚焦到文本区域
             setTimeout(() => {
                 textarea.focus();
             }, 100);
@@ -1145,7 +1924,6 @@ console.log('Hello');
                 return;
             }
             
-            // 直接调用 doSave 函数来保存编辑后的内容
             const success = await doSave(newContent, currentEditId);
             
             if (success) {
@@ -1181,7 +1959,7 @@ console.log('Hello');
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': ADMIN_KEY },
                 body: JSON.stringify({ id: id })
             });
-            loadList();
+            loadNotesList();
         }
 
         async function doAI() {
@@ -1197,7 +1975,6 @@ console.log('Hello');
                 });
                 const data = await res.json();
                 document.getElementById('noteInput').value += `\n\n--- ✨ AI 总结 ---\n\n${data.summary}`;
-                // 更新字符计数
                 document.getElementById('noteCharCount').textContent = document.getElementById('noteInput').value.length;
             } finally { 
                 btn.innerText = "✨ AI 智能总结"; 
@@ -1229,7 +2006,6 @@ console.log('Hello');
                 const clearText = await decrypt(data.content, pw);
                 
                 if (clearText) { 
-                    // 渲染 Markdown
                     resDiv.innerHTML = marked.parse(clearText);
                     hljs.highlightAll();
                     resDiv.classList.remove('hidden'); 
@@ -1247,6 +2023,11 @@ console.log('Hello');
                 unlockBtn.innerText = "解密并销毁";
                 unlockBtn.disabled = false;
             }
+        }
+
+        // ==================== 快速访问功能 ====================
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // ==================== 初始化 ====================
